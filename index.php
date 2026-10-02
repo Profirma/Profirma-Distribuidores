@@ -126,30 +126,25 @@ if (isset($_SESSION['distribuidor_id'])) {
         }
 
         .brand-icon {
-            width: 48px;
-            height: 48px;
+    width: 90px;
+    height: 58px;
 
-            display: flex;
-            align-items: center;
-            justify-content: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-            border-radius: 14px;
+    background: white;
+    border-radius: 12px;
 
-            background:
-                linear-gradient(
-                    135deg,
-                    var(--pf-navy),
-                    var(--pf-blue)
-                );
+    overflow: hidden;
+}
 
-            color: white;
-
-            font-size: 18px;
-            font-weight: 800;
-
-            box-shadow:
-                0 8px 22px rgba(7,57,107,.22);
-        }
+.brand-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+}
 
         .brand-text {
             display: flex;
@@ -1228,9 +1223,9 @@ if (isset($_SESSION['distribuidor_id'])) {
 
         <a href="#inicio" class="brand">
 
-            <div class="brand-icon">
-                PF
-            </div>
+           <div class="brand-icon">
+    <img src="logo.jpeg" alt="PRO-FIRMA">
+</div>
 
             <div class="brand-text">
 
