@@ -1,0 +1,395 @@
+<?php
+
+declare(strict_types=1);
+
+session_start();
+
+$mensaje = '';
+$error = '';
+
+/*
+|--------------------------------------------------------------------------
+| CONEXIÓN A POSTGRESQL
+|--------------------------------------------------------------------------
+*/
+
+$databaseUrl = getenv('DATABASE_URL');
+
+if (!$databaseUrl) {
+    die('DATABASE_URL no está configurada.');
+}
+
+try {
+
+    $db = parse_url($databaseUrl);
+
+    if (
+        $db === false ||
+        empty($db['host']) ||
+        empty($db['path']) ||
+        !isset($db['user']) ||
+        !isset($db['pass'])
+    ) {
+        throw new RuntimeException('DATABASE_URL inválida.');
+    }
+
+    $host = $db['host'];
+    $port = $db['port'] ?? 5432;
+    $dbname = ltrim($db['path'], '/');
+    $dbUser = urldecode((string)$db['user']);
+    $dbPass = urldecode((string)$db['pass']);
+
+    $dsn = sprintf(
+        'pgsql:host=%s;port=%s;dbname=%s',
+        $host,
+        $port,
+        $dbname
+    );
+
+    $pdo = new PDO(
+        $dsn,
+        $dbUser,
+        $dbPass,
+        [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            PDO::ATTR_EMULATE_PREPARES => false,
+        ]
+    );
+
+} catch (Throwable $e) {
+
+    error_log('Error conexión: ' . $e->getMessage());
+    die('No se pudo conectar con la base de datos.');
+}
+
+/*
+|--------------------------------------------------------------------------
+| CREAR DISTRIBUIDOR DE PRUEBA
+|--------------------------------------------------------------------------
+*/
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+    $password = (string)($_POST['password'] ?? '');
+
+    if (strlen($password) < 6) {
+
+        $error = 'La contraseña debe tener mínimo 6 caracteres.';
+
+    } else {
+
+        try {
+
+            /*
+            |--------------------------------------------------------------------------
+            | VERIFICAR SI YA EXISTE
+            |--------------------------------------------------------------------------
+            */
+
+            $correoPrueba = 'prueba@profirmaec.com';
+            $documentoPrueba = '0100000001';
+
+            $stmt = $pdo->prepare(
+                'SELECT id
+                 FROM distribuidores
+                 WHERE LOWER(correo) = LOWER(:correo)
+                    OR numero_documento = :documento
+                 LIMIT 1'
+            );
+
+            $stmt->execute([
+                ':correo' => $correoPrueba,
+                ':documento' => $documentoPrueba
+            ]);
+
+            if ($stmt->fetch()) {
+
+                $error = 'El distribuidor de prueba ya existe.';
+
+            } else {
+
+                /*
+                |--------------------------------------------------------------------------
+                | GENERAR CONTRASEÑA SEGURA
+                |--------------------------------------------------------------------------
+                */
+
+                $passwordHash = password_hash(
+                    $password,
+                    PASSWORD_DEFAULT
+                );
+
+                /*
+                |--------------------------------------------------------------------------
+                | INSERTAR DISTRIBUIDOR
+                |--------------------------------------------------------------------------
+                */
+
+                $sql = '
+                    INSERT INTO distribuidores (
+                        nombres,
+                        apellidos,
+                        tipo_documento,
+                        numero_documento,
+                        empresa,
+                        "RUC",
+                        telefono,
+                        "WhatsApp",
+                        correo,
+                        password_hash,
+                        estado,
+                        tipo_membresia,
+                        fecha_inicio_membresia,
+                        fecha_vencimiento_membresia,
+                        saldo
+                    )
+                    VALUES (
+                        :nombres,
+                        :apellidos,
+                        :tipo_documento,
+                        :numero_documento,
+                        :empresa,
+                        :ruc,
+                        :telefono,
+                        :whatsapp,
+                        :correo,
+                        :password_hash,
+                        :estado,
+                        :tipo_membresia,
+                        CURRENT_TIMESTAMP,
+                        CURRENT_TIMESTAMP + INTERVAL \'30 days\',
+                        :saldo
+                    )
+                ';
+
+                $stmt = $pdo->prepare($sql);
+
+                $stmt->execute([
+                    ':nombres' => 'Distribuidor',
+                    ':apellidos' => 'Prueba',
+                    ':tipo_documento' => 'CEDULA',
+                    ':numero_documento' => $documentoPrueba,
+                    ':empresa' => 'PRO-FIRMA PRUEBAS',
+                    ':ruc' => '0100000001001',
+                    ':telefono' => '0990000000',
+                    ':whatsapp' => '0990000000',
+                    ':correo' => $correoPrueba,
+                    ':password_hash' => $passwordHash,
+                    ':estado' => 'ACTIVO',
+                    ':tipo_membresia' => 'PRUEBA',
+                    ':saldo' => 100.00
+                ]);
+
+                $mensaje = 'Distribuidor de prueba creado correctamente.';
+            }
+
+        } catch (Throwable $e) {
+
+            error_log(
+                'Error creando distribuidor: ' .
+                $e->getMessage()
+            );
+
+            $error = 'No se pudo crear el distribuidor. Revisa los registros del servidor.';
+        }
+    }
+}
+
+?>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Crear distribuidor de prueba</title>
+
+<style>
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(
+        135deg,
+        #073763,
+        #0d5792
+    );
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.card {
+    width: 100%;
+    max-width: 480px;
+    background: white;
+    padding: 40px;
+    border-radius: 24px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.25);
+}
+
+.logo {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.logo img {
+    max-width: 150px;
+    max-height: 90px;
+}
+
+h1 {
+    color: #073763;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.descripcion {
+    text-align: center;
+    color: #64748b;
+    margin-bottom: 30px;
+}
+
+label {
+    display: block;
+    font-weight: bold;
+    color: #0f2745;
+    margin-bottom: 8px;
+}
+
+input {
+    width: 100%;
+    height: 52px;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    padding: 0 15px;
+    font-size: 16px;
+    margin-bottom: 20px;
+}
+
+button {
+    width: 100%;
+    height: 52px;
+    border: 0;
+    border-radius: 10px;
+    background: #084c84;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #063a66;
+}
+
+.mensaje {
+    background: #dcfce7;
+    border: 1px solid #86efac;
+    color: #166534;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.error {
+    background: #fee2e2;
+    border: 1px solid #fca5a5;
+    color: #991b1b;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.datos {
+    background: #f1f5f9;
+    padding: 15px;
+    border-radius: 10px;
+    margin-top: 20px;
+    color: #334155;
+    line-height: 1.7;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="card">
+
+    <div class="logo">
+        <img src="logo.jpeg" alt="PRO-FIRMA">
+    </div>
+
+    <h1>Distribuidor de prueba</h1>
+
+    <div class="descripcion">
+        Crearemos una cuenta temporal para comprobar el acceso al portal.
+    </div>
+
+    <?php if ($mensaje !== ''): ?>
+
+        <div class="mensaje">
+            <?= htmlspecialchars($mensaje, ENT_QUOTES, 'UTF-8') ?>
+        </div>
+
+    <?php endif; ?>
+
+    <?php if ($error !== ''): ?>
+
+        <div class="error">
+            <?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?>
+        </div>
+
+    <?php endif; ?>
+
+    <form method="POST">
+
+        <label>Contraseña para la cuenta de prueba</label>
+
+        <input
+            type="password"
+            name="password"
+            minlength="6"
+            required
+            autocomplete="new-password"
+            placeholder="Escribe una contraseña de prueba"
+        >
+
+        <button type="submit">
+            Crear distribuidor
+        </button>
+
+    </form>
+
+    <div class="datos">
+
+        <strong>Datos para iniciar sesión:</strong><br><br>
+
+        Correo:<br>
+        <strong>prueba@profirmaec.com</strong>
+
+        <br><br>
+
+        Documento:<br>
+        <strong>0100000001</strong>
+
+        <br><br>
+
+        Saldo inicial:<br>
+        <strong>$100.00</strong>
+
+    </div>
+
+</div>
+
+</body>
+</html>
