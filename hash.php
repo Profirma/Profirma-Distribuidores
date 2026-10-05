@@ -1,5 +1,0 @@
-<?php
-
-header('Content-Type: text/plain; charset=utf-8');
-
-echo password_hash('Prueba1234', PASSWORD_DEFAULT);
