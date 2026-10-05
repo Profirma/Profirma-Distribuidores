@@ -25,7 +25,7 @@ $password = (string)($_POST['password'] ?? '');
 
 if ($usuario === '' || $password === '') {
     $_SESSION['login_error'] = 'Ingresa tu número de documento y contraseña.';
-    header('Location: index.php');
+    header('Location: index.php#acceso');
     exit;
 }
 
@@ -39,7 +39,7 @@ $databaseUrl = getenv('DATABASE_URL');
 
 if (!$databaseUrl) {
     $_SESSION['login_error'] = 'No se pudo conectar con el sistema.';
-    header('Location: index.php');
+    header('Location: index.php#acceso');
     exit;
 }
 
@@ -88,26 +88,14 @@ try {
         $e->getMessage()
     );
 
-    $_SESSION['login_error'] =
-        'No se pudo conectar con el sistema.';
-
-    header('Location: index.php');
+    $_SESSION['login_error'] = 'No se pudo conectar con el sistema.';
+    header('Location: index.php#acceso');
     exit;
 }
 
 /*
 |--------------------------------------------------------------------------
 | BUSCAR DISTRIBUIDOR
-|--------------------------------------------------------------------------
-|
-| Por ahora usamos únicamente numero_documento.
-| Así comprobamos primero que:
-|
-| 1. La conexión funciona.
-| 2. El distribuidor existe.
-| 3. La contraseña funciona.
-| 4. La sesión funciona.
-|
 |--------------------------------------------------------------------------
 */
 
@@ -141,25 +129,21 @@ try {
         $e->getMessage()
     );
 
-    $_SESSION['login_error'] =
-        'No se pudo verificar la cuenta.';
-
-    header('Location: index.php');
+    $_SESSION['login_error'] = 'No se pudo verificar la cuenta.';
+    header('Location: index.php#acceso');
     exit;
 }
 
 /*
 |--------------------------------------------------------------------------
-| VALIDAR QUE EXISTA
+| VALIDAR DISTRIBUIDOR
 |--------------------------------------------------------------------------
 */
 
 if (!$distribuidor) {
 
-    $_SESSION['login_error'] =
-        'Usuario o contraseña incorrectos.';
-
-    header('Location: index.php');
+    $_SESSION['login_error'] = 'Usuario o contraseña incorrectos.';
+    header('Location: index.php#acceso');
     exit;
 }
 
@@ -176,10 +160,8 @@ if (
     !password_verify($password, $hash)
 ) {
 
-    $_SESSION['login_error'] =
-        'Usuario o contraseña incorrectos.';
-
-    header('Location: index.php');
+    $_SESSION['login_error'] = 'Usuario o contraseña incorrectos.';
+    header('Location: index.php#acceso');
     exit;
 }
 
@@ -204,7 +186,7 @@ $_SESSION['distribuidor_nombre'] =
     $nombreCompleto;
 
 $_SESSION['distribuidor_empresa'] =
-    'PRO-FIRMA PRUEBAS';
+    '';
 
 $_SESSION['distribuidor_documento'] =
     (string)$distribuidor['numero_documento'];
@@ -214,7 +196,7 @@ $_SESSION['distribuidor_saldo'] =
 
 /*
 |--------------------------------------------------------------------------
-| ENTRAR AL DASHBOARD
+| ENTRAR AL PANEL
 |--------------------------------------------------------------------------
 */
 
