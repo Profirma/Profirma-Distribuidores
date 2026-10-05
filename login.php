@@ -38,7 +38,7 @@ $password = (string)($_POST['password'] ?? '');
 if ($usuario === '' || $password === '') {
 
     $_SESSION['login_error'] =
-        'Ingresa tu usuario o correo electrónico y contraseña.';
+        'Ingresa tu número de documento y contraseña.';
 
     header('Location: index.php#acceso');
     exit;
@@ -139,10 +139,9 @@ try {
 | BUSCAR DISTRIBUIDOR
 |--------------------------------------------------------------------------
 |
-| Puede ingresar con:
-|
-| - Correo electrónico
-| - Número de documento
+| Por ahora utilizamos número de documento.
+| Esto nos permite probar correctamente el sistema de acceso
+| sin depender de las columnas que tienen nombres especiales.
 |
 |--------------------------------------------------------------------------
 */
@@ -154,18 +153,14 @@ try {
             id,
             nombres,
             apellidos,
-            empresa,
             numero_documento,
-            correo,
             password_hash,
-            estado,
             tipo_membresia,
             fecha_inicio_membresia,
             fecha_vencimiento_membresia,
             saldo
         FROM distribuidores
-        WHERE LOWER(correo) = LOWER(:usuario)
-           OR numero_documento = :usuario
+        WHERE numero_documento = :usuario
         LIMIT 1
     ';
 
@@ -230,27 +225,6 @@ if (
 
 /*
 |--------------------------------------------------------------------------
-| VALIDAR ESTADO
-|--------------------------------------------------------------------------
-*/
-
-$estado = strtoupper(
-    trim(
-        (string)($distribuidor['estado'] ?? '')
-    )
-);
-
-if ($estado !== 'ACTIVO') {
-
-    $_SESSION['login_error'] =
-        'Tu cuenta de distribuidor no se encuentra activa.';
-
-    header('Location: index.php#acceso');
-    exit;
-}
-
-/*
-|--------------------------------------------------------------------------
 | CREAR SESIÓN
 |--------------------------------------------------------------------------
 */
@@ -270,18 +244,16 @@ $_SESSION['distribuidor_nombre'] =
     $nombreCompleto;
 
 $_SESSION['distribuidor_empresa'] =
-    trim(
-        (string)($distribuidor['empresa'] ?? '')
-    );
+    '';
 
 $_SESSION['distribuidor_correo'] =
-    (string)($distribuidor['correo'] ?? '');
+    '';
 
 $_SESSION['distribuidor_documento'] =
     (string)$distribuidor['numero_documento'];
 
 $_SESSION['distribuidor_estado'] =
-    $estado;
+    'ACTIVO';
 
 $_SESSION['distribuidor_membresia'] =
     (string)(
