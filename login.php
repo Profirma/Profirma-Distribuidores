@@ -4,22 +4,10 @@ declare(strict_types=1);
 
 session_start();
 
-/*
-|--------------------------------------------------------------------------
-| SI YA ESTÁ AUTENTICADO
-|--------------------------------------------------------------------------
-*/
-
 if (!empty($_SESSION['distribuidor_id'])) {
     header('Location: dashboard.php');
     exit;
 }
-
-/*
-|--------------------------------------------------------------------------
-| SOLO ACEPTAR POST
-|--------------------------------------------------------------------------
-*/
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: index.php');
@@ -36,38 +24,24 @@ $usuario = trim((string)($_POST['usuario'] ?? ''));
 $password = (string)($_POST['password'] ?? '');
 
 if ($usuario === '' || $password === '') {
-
-    $_SESSION['login_error'] =
-        'Ingresa tu número de documento y contraseña.';
-
-    header('Location: index.php#acceso');
+    $_SESSION['login_error'] = 'Ingresa tu número de documento y contraseña.';
+    header('Location: index.php');
     exit;
 }
 
 /*
 |--------------------------------------------------------------------------
-| DATABASE_URL
+| CONEXIÓN A POSTGRESQL
 |--------------------------------------------------------------------------
 */
 
 $databaseUrl = getenv('DATABASE_URL');
 
 if (!$databaseUrl) {
-
-    error_log('DATABASE_URL no está configurada.');
-
-    $_SESSION['login_error'] =
-        'No se pudo conectar con el sistema.';
-
-    header('Location: index.php#acceso');
+    $_SESSION['login_error'] = 'No se pudo conectar con el sistema.';
+    header('Location: index.php');
     exit;
 }
-
-/*
-|--------------------------------------------------------------------------
-| CONECTAR A POSTGRESQL
-|--------------------------------------------------------------------------
-*/
 
 try {
 
@@ -80,25 +54,17 @@ try {
         !isset($db['user']) ||
         !isset($db['pass'])
     ) {
-        throw new RuntimeException(
-            'DATABASE_URL inválida.'
-        );
+        throw new RuntimeException('DATABASE_URL inválida.');
     }
 
-    $host = (string)$db['host'];
-    $port = (int)($db['port'] ?? 5432);
-    $dbname = ltrim((string)$db['path'], '/');
-
-    $dbUser = urldecode(
-        (string)$db['user']
-    );
-
-    $dbPass = urldecode(
-        (string)$db['pass']
-    );
+    $host = $db['host'];
+    $port = $db['port'] ?? 5432;
+    $dbname = ltrim($db['path'], '/');
+    $dbUser = urldecode((string)$db['user']);
+    $dbPass = urldecode((string)$db['pass']);
 
     $dsn = sprintf(
-        'pgsql:host=%s;port=%d;dbname=%s',
+        'pgsql:host=%s;port=%s;dbname=%s',
         $host,
         $port,
         $dbname
@@ -109,14 +75,9 @@ try {
         $dbUser,
         $dbPass,
         [
-            PDO::ATTR_ERRMODE =>
-                PDO::ERRMODE_EXCEPTION,
-
-            PDO::ATTR_DEFAULT_FETCH_MODE =>
-                PDO::FETCH_ASSOC,
-
-            PDO::ATTR_EMULATE_PREPARES =>
-                false,
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            PDO::ATTR_EMULATE_PREPARES => false,
         ]
     );
 
@@ -130,7 +91,7 @@ try {
     $_SESSION['login_error'] =
         'No se pudo conectar con el sistema.';
 
-    header('Location: index.php#acceso');
+    header('Location: index.php');
     exit;
 }
 
@@ -139,9 +100,13 @@ try {
 | BUSCAR DISTRIBUIDOR
 |--------------------------------------------------------------------------
 |
-| Por ahora utilizamos número de documento.
-| Esto nos permite probar correctamente el sistema de acceso
-| sin depender de las columnas que tienen nombres especiales.
+| Por ahora usamos únicamente numero_documento.
+| Así comprobamos primero que:
+|
+| 1. La conexión funciona.
+| 2. El distribuidor existe.
+| 3. La contraseña funciona.
+| 4. La sesión funciona.
 |
 |--------------------------------------------------------------------------
 */
@@ -155,9 +120,6 @@ try {
             apellidos,
             numero_documento,
             password_hash,
-            tipo_membresia,
-            fecha_inicio_membresia,
-            fecha_vencimiento_membresia,
             saldo
         FROM distribuidores
         WHERE numero_documento = :usuario
@@ -182,13 +144,13 @@ try {
     $_SESSION['login_error'] =
         'No se pudo verificar la cuenta.';
 
-    header('Location: index.php#acceso');
+    header('Location: index.php');
     exit;
 }
 
 /*
 |--------------------------------------------------------------------------
-| DISTRIBUIDOR NO EXISTE
+| VALIDAR QUE EXISTA
 |--------------------------------------------------------------------------
 */
 
@@ -197,7 +159,7 @@ if (!$distribuidor) {
     $_SESSION['login_error'] =
         'Usuario o contraseña incorrectos.';
 
-    header('Location: index.php#acceso');
+    header('Location: index.php');
     exit;
 }
 
@@ -207,9 +169,7 @@ if (!$distribuidor) {
 |--------------------------------------------------------------------------
 */
 
-$hash = trim(
-    (string)($distribuidor['password_hash'] ?? '')
-);
+$hash = (string)($distribuidor['password_hash'] ?? '');
 
 if (
     $hash === '' ||
@@ -219,7 +179,7 @@ if (
     $_SESSION['login_error'] =
         'Usuario o contraseña incorrectos.';
 
-    header('Location: index.php#acceso');
+    header('Location: index.php');
     exit;
 }
 
@@ -232,8 +192,8 @@ if (
 session_regenerate_id(true);
 
 $nombreCompleto = trim(
-    (string)$distribuidor['nombres']
-    . ' ' .
+    (string)$distribuidor['nombres'] .
+    ' ' .
     (string)$distribuidor['apellidos']
 );
 
@@ -244,40 +204,13 @@ $_SESSION['distribuidor_nombre'] =
     $nombreCompleto;
 
 $_SESSION['distribuidor_empresa'] =
-    '';
-
-$_SESSION['distribuidor_correo'] =
-    '';
+    'PRO-FIRMA PRUEBAS';
 
 $_SESSION['distribuidor_documento'] =
     (string)$distribuidor['numero_documento'];
 
-$_SESSION['distribuidor_estado'] =
-    'ACTIVO';
-
-$_SESSION['distribuidor_membresia'] =
-    (string)(
-        $distribuidor['tipo_membresia'] ?? ''
-    );
-
 $_SESSION['distribuidor_saldo'] =
     (float)($distribuidor['saldo'] ?? 0);
-
-$_SESSION['distribuidor_fecha_inicio'] =
-    $distribuidor['fecha_inicio_membresia']
-    ?? null;
-
-$_SESSION['distribuidor_fecha_vencimiento'] =
-    $distribuidor['fecha_vencimiento_membresia']
-    ?? null;
-
-/*
-|--------------------------------------------------------------------------
-| LIMPIAR ERROR ANTERIOR
-|--------------------------------------------------------------------------
-*/
-
-unset($_SESSION['login_error']);
 
 /*
 |--------------------------------------------------------------------------
