@@ -97,6 +97,10 @@ try {
 |--------------------------------------------------------------------------
 | BUSCAR DISTRIBUIDOR
 |--------------------------------------------------------------------------
+|
+| Para esta primera prueba utilizaremos el número de documento.
+|
+|--------------------------------------------------------------------------
 */
 
 try {
@@ -136,7 +140,7 @@ try {
 
 /*
 |--------------------------------------------------------------------------
-| VALIDAR DISTRIBUIDOR
+| VALIDAR QUE EXISTA
 |--------------------------------------------------------------------------
 */
 
@@ -174,8 +178,7 @@ if (
 session_regenerate_id(true);
 
 $nombreCompleto = trim(
-    (string)$distribuidor['nombres'] .
-    ' ' .
+    (string)$distribuidor['nombres'] . ' ' .
     (string)$distribuidor['apellidos']
 );
 
@@ -192,7 +195,7 @@ $_SESSION['distribuidor_documento'] =
     (string)$distribuidor['numero_documento'];
 
 $_SESSION['distribuidor_saldo'] =
-    (float)($distribuidor['saldo'] ?? 0);
+    (float)$distribuidor['saldo'];
 
 /*
 |--------------------------------------------------------------------------
