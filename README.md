@@ -21,9 +21,13 @@ Cinco intentos fallidos por correo bloquean ese correo durante una ventana de 15
 
 Una sola réplica mientras las sesiones PHP permanezcan en el contenedor. Los despliegues pueden cerrar sesiones. Mantener HTTPS; SESSION_SECURE=0 se permite solo en pruebas HTTP locales.
 
-El panel de distribuidor muestra únicamente su nombre y correo. Compras, saldo, movimientos y recuperación/cambio de contraseña quedan pendientes. El módulo administrativo permite crear cuentas y consultar las últimas 100.
+El panel muestra la cuenta, el saldo acreditado y los historiales de recargas y movimientos. El administrador crea cuentas, revisa comprobantes y aprueba o rechaza recargas. La emisión de firmas y sus descuentos, y la recuperación/cambio de contraseña, siguen pendientes.
 DATABASE_URL solo se configura en Railway; nunca subir credenciales al repositorio.
 
 ## Validación
 
 La propuesta del administrador incluye pruebas automáticas de integración contra PostgreSQL para ambos repositorios. Requiere que la rama coordinada del portal siga disponible.
+
+## Recargas por transferencia
+
+Ahora se puede enviar un comprobante privado, consultar su revisión y ver el saldo acreditado por el administrador. Activación y pruebas: [RECARGAS.md](RECARGAS.md). La emisión de firmas y los descuentos aún no están habilitados.
