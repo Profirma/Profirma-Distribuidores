@@ -3,6 +3,7 @@
     "php": "^8.4",
     "ext-pdo": "*",
     "ext-pdo_pgsql": "*",
-    "ext-fileinfo": "*"
+    "ext-fileinfo": "*",
+    "ext-curl": "*"
   }
 }
