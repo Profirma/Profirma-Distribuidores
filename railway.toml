@@ -1,2 +1,0 @@
-[deploy]
-preDeployCommand = ["php scripts/install_emissions.php"]

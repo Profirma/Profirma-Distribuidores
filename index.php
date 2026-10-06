@@ -35,7 +35,7 @@ if (!empty($_SESSION['login_error'])) {
 
     <meta
         name="description"
-        content="Portal de distribuidores PRO-FIRMA: solicitudes de firma electrónica, recargas y saldo."
+        content="Portal exclusivo para distribuidores y compradores mayoristas de PRO-FIRMA."
     >
 
     <link
@@ -1458,7 +1458,7 @@ footer {
 <section class="hero" id="inicio"><div class="container hero-grid"><div class="hero-copy">
 <div class="badge"><i class="fas fa-file-signature"></i> Distribución de firmas electrónicas</div>
 <h1>Tu cuenta de distribuidor en <span>PRO-FIRMA</span></h1>
-<p class="hero-description">Solicita firmas electrónicas para tus clientes, recarga tu saldo por transferencia y consulta tus trámites desde tu cuenta.</p>
+<p class="hero-description">Gestiona tus recargas, consulta el saldo disponible y revisa tus movimientos desde tu cuenta.</p>
 <div class="hero-buttons"><a href="#proceso" class="btn btn-light"><i class="fas fa-wallet"></i> CÓMO RECARGAR</a></div>
 </div>
         <div class="login-card" id="acceso">
@@ -1476,7 +1476,7 @@ footer {
                 </h2>
 
                 <p>
-                    Emite firmas y administra tu saldo
+                    Consulta tu saldo y gestiona tus recargas
                 </p>
 
             </div>

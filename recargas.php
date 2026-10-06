@@ -52,7 +52,10 @@ if ($ready) {
             status, created_at, rejection_reason FROM pf_distribuidores.recharges WHERE user_id = ? ORDER BY id DESC LIMIT 50");
         $statement->execute([$user['id']]);
         $history = $statement->fetchAll();
-        $movements = dist_wallet_history(dist_db(), (int)$user['id']);
+        $statement = dist_db()->prepare("SELECT recharge_id, amount_cents, created_at
+            FROM pf_distribuidores.wallet_movements WHERE user_id = ? ORDER BY id DESC LIMIT 50");
+        $statement->execute([$user['id']]);
+        $movements = $statement->fetchAll();
     } catch (Throwable $exception) {
         http_response_code(503);
         exit('No se pudo cargar tu saldo. Inténtalo más tarde.');
@@ -62,7 +65,7 @@ $instructions = trim((string)getenv('BANK_TRANSFER_INSTRUCTIONS'));
 ?>
 <!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Recargar saldo | PRO-FIRMA</title><link rel="stylesheet" href="assets/panel.css"></head>
-<body><header><a class="brand" href="dashboard.php"><img src="logo.jpeg" alt="PRO-FIRMA"> Portal de distribuidores</a><nav class="links"><a href="dashboard.php">Mi cuenta</a><a href="emisiones.php">Emitir firma</a>
+<body><header><a class="brand" href="dashboard.php"><img src="logo.jpeg" alt="PRO-FIRMA"> Portal de distribuidores</a><nav class="links"><a href="dashboard.php">Mi cuenta</a>
 <form method="post" action="logout.php"><input type="hidden" name="csrf" value="<?= escape(csrf_token()) ?>"><button>Cerrar sesión</button></form></nav></header>
 <main><h1>Recargar saldo</h1>
 <?php if ($error): ?><p class="notice error" role="alert"><?= escape($error) ?></p><?php endif; ?>
@@ -93,8 +96,8 @@ $instructions = trim((string)getenv('BANK_TRANSFER_INSTRUCTIONS'));
 <?php foreach ($history as $item): ?><tr><td>#<?= (int)$item['id'] ?></td><td><?= escape(dist_money($item['amount_cents'])) ?></td><td><?= escape($item['bank']) ?><br><?= escape($item['transfer_reference']) ?><br><?= escape($item['transfer_date']) ?></td><td><?= escape($item['status']) ?></td><td><?= escape($item['rejection_reason'] ?? '') ?></td><td><a href="comprobante.php?id=<?= (int)$item['id'] ?>">Descargar</a></td></tr><?php endforeach; ?>
 </tbody></table></div></section>
 <section><h2>Últimos 50 movimientos de saldo</h2><?php if (!$movements): ?><p>Todavía no tienes movimientos de saldo.</p><?php endif; ?>
-<div class="table"><table><thead><tr><th>Fecha</th><th>Concepto</th><th>Movimiento</th></tr></thead><tbody>
-<?php foreach ($movements as $item): ?><tr><td><?= escape($item['created_at']) ?></td><td><?= escape($item['concept']) ?><br><?= escape($item['reference']) ?></td><td><?= (int)$item['amount_cents'] > 0 ? '+' : '' ?><?= escape(dist_money($item['amount_cents'])) ?></td></tr><?php endforeach; ?>
+<div class="table"><table><thead><tr><th>Fecha</th><th>Concepto</th><th>Abono</th></tr></thead><tbody>
+<?php foreach ($movements as $item): ?><tr><td><?= escape($item['created_at']) ?></td><td>Recarga #<?= (int)$item['recharge_id'] ?> aprobada</td><td>+<?= escape(dist_money($item['amount_cents'])) ?></td></tr><?php endforeach; ?>
 </tbody></table></div></section><?php endif; ?></main><script>
 const bank = document.getElementById('bank');
 const other = document.getElementById('bank-other');
