@@ -1,6 +1,5 @@
 <?php
 declare(strict_types=1);
-require_once __DIR__ . '/emissions.php';
 
 function dist_wallet_schema(): string
 {
@@ -227,14 +226,7 @@ function dist_wallet_balance(PDO $connection, int $userId): int
     $statement = $connection->prepare('SELECT COALESCE(SUM(amount_cents), 0)
         FROM pf_distribuidores.wallet_movements WHERE user_id = ?');
     $statement->execute([$userId]);
-    $credited = (int)$statement->fetchColumn();
-    if (!dist_emissions_ready($connection)) {
-        return $credited;
-    }
-    $charges = $connection->prepare("SELECT COALESCE(SUM(cost_cents), 0)
-        FROM pf_distribuidores.emissions WHERE user_id = ? AND status <> 'rechazada'");
-    $charges->execute([$userId]);
-    return $credited - (int)$charges->fetchColumn();
+    return (int)$statement->fetchColumn();
 }
 
 function dist_receipt_download(PDO $connection, int $id, ?int $ownerId): never
@@ -266,22 +258,4 @@ function dist_receipt_download(PDO $connection, int $id, ?int $ownerId): never
     header("Content-Security-Policy: sandbox; default-src 'none'");
     echo $data;
     exit;
-}
-
-function dist_wallet_history(PDO $connection, int $userId): array
-{
-    $sql = "SELECT recharge_id::text AS reference, 'Recarga aprobada' AS concept,
-        amount_cents, created_at FROM pf_distribuidores.wallet_movements WHERE user_id = ?";
-    $params = [$userId];
-    if (dist_emissions_ready($connection)) {
-        $sql .= " UNION ALL SELECT numero_tramite AS reference,
-            CASE WHEN status = 'registrada' THEN 'Solicitud de firma registrada'
-                ELSE 'Reserva de saldo para emisión' END AS concept,
-            -cost_cents AS amount_cents, created_at
-            FROM pf_distribuidores.emissions WHERE user_id = ? AND status <> 'rechazada'";
-        $params[] = $userId;
-    }
-    $statement = $connection->prepare("SELECT * FROM (" . $sql . ") AS history ORDER BY created_at DESC, reference DESC LIMIT 50");
-    $statement->execute($params);
-    return $statement->fetchAll();
 }
