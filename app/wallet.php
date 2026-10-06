@@ -142,7 +142,7 @@ function dist_submit_recharge(PDO $connection, int $userId, array $fields, array
         $user = $connection->prepare("SELECT id FROM pf_distribuidores.users WHERE id = ? AND active = TRUE FOR UPDATE");
         $user->execute([$userId]);
         if (!$user->fetch()) {
-            throw new InvalidArgumentException('La cuenta de distribuidor no está activa.');
+            throw new InvalidArgumentException('La cuenta de aliado no está activa.');
         }
         $existing = $connection->prepare('SELECT id FROM pf_distribuidores.recharges WHERE user_id = ? AND request_key = ?');
         $existing->execute([$userId, $fields['request_key']]);

@@ -46,7 +46,7 @@ function dist_emissions_ready(PDO $connection): bool
 function dist_emissions_initialize(PDO $connection): void
 {
     if (!dist_wallet_ready($connection)) {
-        throw new RuntimeException('Primero habilita las recargas de distribuidores.');
+        throw new RuntimeException('Primero habilita las recargas de aliados.');
     }
     $connection->beginTransaction();
     try {
@@ -260,7 +260,7 @@ function dist_submit_emission(PDO $connection, int $userId, array $input): array
     $prices = dist_emission_prices();
     $cost = $prices[$data['perfil_firma']] ?? null;
     if (!$cost) {
-        throw new InvalidArgumentException('Esta vigencia todavía no tiene una tarifa de distribuidor.');
+        throw new InvalidArgumentException('Esta vigencia todavía no tiene una tarifa de aliado.');
     }
     if (($input['quoted_cost'] ?? '') !== (string)$cost) {
         throw new InvalidArgumentException('La tarifa cambió. Recarga la página para confirmar el precio actualizado.');
