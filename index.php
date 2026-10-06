@@ -1587,15 +1587,15 @@ footer {
 <article class="process-card"><div class="process-number">3</div><h3>Recibe la acreditación</h3><p>El administrador verifica que el pago haya llegado y aprueba la recarga. Entonces el saldo queda disponible en tu cuenta.</p></article>
 </div></div></section>
 <section class="cta-section" id="contacto"><div class="container"><div class="cta"><div class="cta-content">
-<h2>¿Quieres ser administrador?</h2><p>Contáctanos para solicitar acceso y conocer los requisitos.</p>
-<a href="https://wa.me/593997210562?text=Hola%20PRO-FIRMA%2C%20quiero%20solicitar%20acceso%20de%20administrador.%20%C2%BFCu%C3%A1les%20son%20los%20requisitos%3F" target="_blank" rel="noopener noreferrer" class="btn btn-light"><i class="fab fa-whatsapp"></i> CONTACTAR A PRO-FIRMA</a>
+<h2>¿Quieres ser distribuidor?</h2><p>Contáctanos para solicitar tu cuenta de distribuidor y conocer los requisitos.</p>
+<a href="https://wa.me/593997210562?text=Hola%20PRO-FIRMA%2C%20quiero%20solicitar%20una%20cuenta%20de%20distribuidor.%20%C2%BFCu%C3%A1les%20son%20los%20requisitos%3F" target="_blank" rel="noopener noreferrer" class="btn btn-light"><i class="fab fa-whatsapp"></i> CONTACTAR A PRO-FIRMA</a>
 </div></div></div></section>
 <footer><div class="container"><div class="footer-grid">
 <div class="footer-col"><div class="footer-brand">PRO-FIRMA</div><p>Portal de distribuidores de firmas electrónicas.</p></div>
 <div class="footer-col"><h4>Tu cuenta</h4><ul><li><a href="#acceso">Iniciar sesión</a></li><li><a href="#proceso">Cómo recargar</a></li></ul></div>
-<div class="footer-col"><h4>Atención</h4><ul><li><a href="https://wa.me/593997210562?text=Hola%20PRO-FIRMA%2C%20quiero%20solicitar%20acceso%20de%20administrador.%20%C2%BFCu%C3%A1les%20son%20los%20requisitos%3F" target="_blank" rel="noopener noreferrer">Contactar con nosotros</a></li></ul></div>
+<div class="footer-col"><h4>Atención</h4><ul><li><a href="https://wa.me/593997210562?text=Hola%20PRO-FIRMA%2C%20quiero%20solicitar%20una%20cuenta%20de%20distribuidor.%20%C2%BFCu%C3%A1les%20son%20los%20requisitos%3F" target="_blank" rel="noopener noreferrer">Contactar con nosotros</a></li></ul></div>
 </div><div class="copyright">© <?= date('Y') ?> PRO-FIRMA. Todos los derechos reservados.</div></div></footer>
-<a href="https://wa.me/593997210562?text=Hola%20PRO-FIRMA%2C%20quiero%20solicitar%20acceso%20de%20administrador.%20%C2%BFCu%C3%A1les%20son%20los%20requisitos%3F" target="_blank" rel="noopener noreferrer" class="whatsapp" title="Contactar a PRO-FIRMA" aria-label="Contactar a PRO-FIRMA por WhatsApp"><i class="fab fa-whatsapp"></i></a>
+<a href="https://wa.me/593997210562?text=Hola%20PRO-FIRMA%2C%20quiero%20solicitar%20una%20cuenta%20de%20distribuidor.%20%C2%BFCu%C3%A1les%20son%20los%20requisitos%3F" target="_blank" rel="noopener noreferrer" class="whatsapp" title="Contactar a PRO-FIRMA" aria-label="Contactar a PRO-FIRMA por WhatsApp"><i class="fab fa-whatsapp"></i></a>
 <script>
 const mobileToggle = document.getElementById('mobileToggle');
 const mainNav = document.getElementById('mainNav');
