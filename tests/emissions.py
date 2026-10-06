@@ -81,11 +81,13 @@ class ENEXT(http.server.BaseHTTPRequestHandler):
             response, status = {"codigo": 1}, 200
         else:
             response, status = {"codigo": 1, "token_biometria": "private-token", "link_biometria": "https://example.com/private"}, 200
-        self.send_response(status)
-        self.end_headers()
         body = b"not-json" if name == "malformed" else json.dumps(response).encode()
         if name == "prefix":
             body = b"Provider warning\n" + body
+        self.send_response(status)
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
         self.wfile.write(body)
 
 subprocess.run(["openssl", "req", "-x509", "-newkey", "rsa:2048", "-nodes", "-days", "1",
