@@ -12,7 +12,7 @@ try {
 ?>
 <!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Mi cuenta | PRO-FIRMA</title><link rel="stylesheet" href="assets/panel.css"></head>
-<body><header><a class="brand" href="dashboard.php"><img src="logo.jpeg" alt="PRO-FIRMA"> Portal de distribuidores</a>
+<body><header><a class="brand" href="dashboard.php"><img src="logo.jpeg" alt="PRO-FIRMA"> Portal de Aliados</a>
 <nav class="links"><a href="emisiones.php">Emitir firma</a><a href="recargas.php">Recargas y saldo</a><form method="post" action="logout.php"><input type="hidden" name="csrf" value="<?= escape(csrf_token()) ?>"><button>Cerrar sesión</button></form></nav></header>
 <main><h1>Bienvenido, <?= escape($user['name']) ?></h1>
 <?php if ($walletReady): ?><div class="stat"><strong><?= escape(dist_money($balance)) ?></strong> saldo disponible <p><a href="recargas.php">Recargar por transferencia y consultar movimientos</a></p></div>

@@ -31,11 +31,11 @@ if (!empty($_SESSION['login_error'])) {
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>PRO-FIRMA | Portal de Distribuidores</title>
+    <title>PRO-FIRMA | Portal de Aliados</title>
 
     <meta
         name="description"
-        content="Portal de distribuidores PRO-FIRMA: solicitudes de firma electrónica, recargas y saldo."
+        content="Portal de aliados PRO-FIRMA: solicitudes de firma electrónica, recargas y saldo."
     >
 
     <link
@@ -1450,14 +1450,14 @@ footer {
 
 <body>
 <header><div class="container header-content">
-<a href="#inicio" class="brand"><div class="brand-icon"><img src="logo.jpeg" alt="PRO-FIRMA"></div><div class="brand-text"><div class="brand-name">PRO<span>-FIRMA</span></div><div class="brand-subtitle">Portal de Distribuidores</div></div></a>
+<a href="#inicio" class="brand"><div class="brand-icon"><img src="logo.jpeg" alt="PRO-FIRMA"></div><div class="brand-text"><div class="brand-name">PRO<span>-FIRMA</span></div><div class="brand-subtitle">Portal de Aliados</div></div></a>
 <button type="button" class="mobile-toggle" id="mobileToggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="mainNav"><i class="fas fa-bars"></i></button>
 <nav id="mainNav"><ul><li><a href="#inicio">Inicio</a></li><li><a href="#proceso">Cómo recargar</a></li><li><a href="#contacto">Contacto</a></li></ul></nav>
 <a href="#acceso" class="btn btn-primary header-button"><i class="fas fa-right-to-bracket"></i> INGRESAR</a>
 </div></header>
 <section class="hero" id="inicio"><div class="container hero-grid"><div class="hero-copy">
 <div class="badge"><i class="fas fa-file-signature"></i> Distribución de firmas electrónicas</div>
-<h1>Tu cuenta de distribuidor en <span>PRO-FIRMA</span></h1>
+<h1>Tu cuenta de aliado en <span>PRO-FIRMA</span></h1>
 <p class="hero-description">Solicita firmas electrónicas para tus clientes, recarga tu saldo por transferencia y consulta tus trámites desde tu cuenta.</p>
 <div class="hero-buttons"><a href="#proceso" class="btn btn-light"><i class="fas fa-wallet"></i> CÓMO RECARGAR</a></div>
 </div>
@@ -1472,7 +1472,7 @@ footer {
                 </div>
 
                 <h2>
-                    Acceso de Distribuidores
+                    Acceso de Aliados
                 </h2>
 
                 <p>
@@ -1572,7 +1572,7 @@ footer {
 
                 <i class="fas fa-shield-halved"></i>
 
-                Acceso privado para distribuidores registrados
+                Acceso privado para aliados registrados
 
             </div>
 
@@ -1587,15 +1587,15 @@ footer {
 <article class="process-card"><div class="process-number">3</div><h3>Recibe la acreditación</h3><p>El administrador verifica que el pago haya llegado y aprueba la recarga. Entonces el saldo queda disponible en tu cuenta.</p></article>
 </div></div></section>
 <section class="cta-section" id="contacto"><div class="container"><div class="cta"><div class="cta-content">
-<h2>¿Quieres ser distribuidor?</h2><p>Contáctanos para solicitar tu cuenta de distribuidor y conocer los requisitos.</p>
-<a href="https://wa.me/593997210562?text=Hola%20PRO-FIRMA%2C%20quiero%20solicitar%20una%20cuenta%20de%20distribuidor.%20%C2%BFCu%C3%A1les%20son%20los%20requisitos%3F" target="_blank" rel="noopener noreferrer" class="btn btn-light"><i class="fab fa-whatsapp"></i> CONTACTAR A PRO-FIRMA</a>
+<h2>¿Quieres ser aliado de PRO-FIRMA?</h2><p>Contáctanos para solicitar tu cuenta de aliado y conocer los requisitos.</p>
+<a href="https://wa.me/593997210562?text=Hola%20PRO-FIRMA%2C%20quiero%20solicitar%20una%20cuenta%20de%20aliado.%20%C2%BFCu%C3%A1les%20son%20los%20requisitos%3F" target="_blank" rel="noopener noreferrer" class="btn btn-light"><i class="fab fa-whatsapp"></i> CONTACTAR A PRO-FIRMA</a>
 </div></div></div></section>
 <footer><div class="container"><div class="footer-grid">
-<div class="footer-col"><div class="footer-brand">PRO-FIRMA</div><p>Portal de distribuidores de firmas electrónicas.</p></div>
+<div class="footer-col"><div class="footer-brand">PRO-FIRMA</div><p>Portal de aliados de firmas electrónicas.</p></div>
 <div class="footer-col"><h4>Tu cuenta</h4><ul><li><a href="#acceso">Iniciar sesión</a></li><li><a href="#proceso">Cómo recargar</a></li></ul></div>
-<div class="footer-col"><h4>Atención</h4><ul><li><a href="https://wa.me/593997210562?text=Hola%20PRO-FIRMA%2C%20quiero%20solicitar%20una%20cuenta%20de%20distribuidor.%20%C2%BFCu%C3%A1les%20son%20los%20requisitos%3F" target="_blank" rel="noopener noreferrer">Contactar con nosotros</a></li></ul></div>
+<div class="footer-col"><h4>Atención</h4><ul><li><a href="https://wa.me/593997210562?text=Hola%20PRO-FIRMA%2C%20quiero%20solicitar%20una%20cuenta%20de%20aliado.%20%C2%BFCu%C3%A1les%20son%20los%20requisitos%3F" target="_blank" rel="noopener noreferrer">Contactar con nosotros</a></li></ul></div>
 </div><div class="copyright">© <?= date('Y') ?> PRO-FIRMA. Todos los derechos reservados.</div></div></footer>
-<a href="https://wa.me/593997210562?text=Hola%20PRO-FIRMA%2C%20quiero%20solicitar%20una%20cuenta%20de%20distribuidor.%20%C2%BFCu%C3%A1les%20son%20los%20requisitos%3F" target="_blank" rel="noopener noreferrer" class="whatsapp" title="Contactar a PRO-FIRMA" aria-label="Contactar a PRO-FIRMA por WhatsApp"><i class="fab fa-whatsapp"></i></a>
+<a href="https://wa.me/593997210562?text=Hola%20PRO-FIRMA%2C%20quiero%20solicitar%20una%20cuenta%20de%20aliado.%20%C2%BFCu%C3%A1les%20son%20los%20requisitos%3F" target="_blank" rel="noopener noreferrer" class="whatsapp" title="Contactar a PRO-FIRMA" aria-label="Contactar a PRO-FIRMA por WhatsApp"><i class="fab fa-whatsapp"></i></a>
 <script>
 const mobileToggle = document.getElementById('mobileToggle');
 const mainNav = document.getElementById('mainNav');

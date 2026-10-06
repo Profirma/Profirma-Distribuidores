@@ -19,7 +19,7 @@ try {
             $prices = dist_emission_prices();
             dist_enext_config();
             if (!$prices) {
-                $configurationError = 'Las tarifas de distribuidor todavía no están configuradas.';
+                $configurationError = 'Las tarifas de aliado todavía no están configuradas.';
             }
         } catch (Throwable $exception) {
             $configurationError = 'La emisión todavía no está habilitada. Contacta con PRO-FIRMA.';
@@ -73,7 +73,7 @@ $requested = is_string($_GET['tramite'] ?? null) ? $_GET['tramite'] : '';
 ?>
 <!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Emitir firma | PRO-FIRMA</title><link rel="stylesheet" href="assets/panel.css"></head>
-<body><header><a class="brand" href="dashboard.php"><img src="logo.jpeg" alt="PRO-FIRMA"> Portal de distribuidores</a>
+<body><header><a class="brand" href="dashboard.php"><img src="logo.jpeg" alt="PRO-FIRMA"> Portal de Aliados</a>
 <nav class="links"><a href="dashboard.php">Mi cuenta</a><a href="recargas.php">Recargas y saldo</a>
 <form method="post" action="logout.php"><input type="hidden" name="csrf" value="<?= escape(csrf_token()) ?>"><button>Cerrar sesión</button></form></nav></header>
 <main><h1>Emitir firma electrónica</h1><div class="stat"><strong><?= escape(dist_money($balance)) ?></strong> saldo disponible</div>
