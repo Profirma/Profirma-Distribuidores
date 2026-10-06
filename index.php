@@ -1,13 +1,18 @@
 <?php
 
-session_start();
+require __DIR__ . '/app/bootstrap.php';
 
-if (!empty($_SESSION['distribuidor_id'])) {
-    header('Location: dashboard.php');
-    exit;
+if (!empty($_SESSION['user_id'])) {
+    try {
+        if (current_user()) {
+            redirect('dashboard.php');
+        }
+    } catch (Throwable $error) {
+        $loginError = 'El acceso no está disponible temporalmente.';
+    }
 }
 
-$loginError = '';
+$loginError = $loginError ?? '';
 
 if (!empty($_SESSION['login_error'])) {
     $loginError = (string)$_SESSION['login_error'];
@@ -1692,11 +1697,12 @@ footer {
                 method="POST"
                 autocomplete="on"
             >
+                <input type="hidden" name="csrf" value="<?= escape(csrf_token()) ?>">
 
                 <div class="field">
 
                     <label for="usuario">
-                        Usuario o correo electrónico
+                        Correo electrónico
                     </label>
 
                     <div class="input-wrapper">
@@ -1704,10 +1710,10 @@ footer {
                         <i class="fas fa-user"></i>
 
                         <input
-                            type="text"
+                            type="email"
                             id="usuario"
                             name="usuario"
-                            placeholder="Ingresa tu usuario"
+                            placeholder="Ingresa tu correo"
                             autocomplete="username"
                             required
                         >
