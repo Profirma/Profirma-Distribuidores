@@ -1,7 +1,7 @@
-name: Validar PHP
+name: Validar portal y emisión ENEXT
 on:
   push:
-    branches: [codex/banco-portada]
+    branches: [main, codex/banco-portada, codex/emision-enext]
   pull_request:
 permissions:
   contents: read
@@ -11,4 +11,26 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Comprobar sintaxis PHP 8.4
-        run: docker run --rm -v "$PWD:/app" -w /app php:8.4-cli sh -c 'find . -type f -name "*.php" -exec php -l {} \; > /tmp/lint.log; cat /tmp/lint.log; ! grep -E "Errors parsing|Parse error|Fatal error" /tmp/lint.log'
+        run: docker run --rm -v "$PWD:/app" -w /app php:8.4-cli sh -c 'find . -name "*.php" -type f > /tmp/files; while IFS= read -r file; do php -l "$file" || exit 1; done < /tmp/files'
+  emissions:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: portal_test
+          POSTGRES_PASSWORD: portal_test_password
+          POSTGRES_DB: portal_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Preparar entorno PHP y PostgreSQL
+        run: docker build -f tests/Dockerfile -t portal-emissions-test .
+      - name: Probar ENEXT simulado, saldo y permisos
+        run: docker run --rm --network host -e DATABASE_URL=postgresql://portal_test:portal_test_password@127.0.0.1:5432/portal_test portal-emissions-test
