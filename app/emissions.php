@@ -86,7 +86,7 @@ function dist_emission_data(array $input): array
     foreach (['perfil_firma','nombres','apellidos','cedula','codigo_dactilar','correo',
         'provincia','ciudad','parroquia','direccion','celular'] as $field) {
         $value = $input[$field] ?? null;
-        if (!is_string($value) || trim($value) === '' || strlen($value) > 250
+        if (!is_string($value) || trim($value) === '' || strlen($value) > 250 || preg_match('//u', $value) !== 1
             || preg_match('/[\\x00-\\x1F\\x7F]/', $value)) {
             throw new InvalidArgumentException('Completa correctamente el campo: ' . $field . '.');
         }

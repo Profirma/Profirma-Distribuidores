@@ -206,7 +206,7 @@ def request(client, path, fields=None):
         response = client.open(base + path, payload, timeout=20)
     except urllib.error.HTTPError as error:
         response = error
-    return response.status, response.read(), response.geturl()
+    return response.status, response.read(), response.geturl().split("#", 1)[0]
 
 def csrf(page):
     return re.search(rb'name="csrf" value="([a-f0-9]+)"', page).group(1).decode()
