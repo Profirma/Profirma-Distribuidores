@@ -36,7 +36,7 @@ Se reserva antes de la petición mediante una transacción con bloqueo de la cue
 | Estado | Saldo | Significado |
 | --- | --- | --- |
 | `enviando` | Reservado | Solicitud registrada localmente; envío en curso o proceso interrumpido |
-| `registrada` | Descontado | ENEXT aceptó y devolvió token/enlace; el titular debe completar la biometría |
+| `registrada` | Descontado | ENEXT confirmó la aceptación con HTTP 2xx y código 1; el titular debe completar la biometría |
 | `rechazada` | Liberado | Rechazo explícito del proveedor o ausencia confirmada por un operador |
 | `revision` | Reservado | Error de red, respuesta incompleta/no JSON o resultado incierto |
 
