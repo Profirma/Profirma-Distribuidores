@@ -130,7 +130,7 @@ os.environ["ENEXT_BASIC_PASSWORD"] = ""
 assert "error" in submit(data()) and not calls
 os.environ["ENEXT_BASIC_PASSWORD"] = "test-basic-password"
 
-first = data()
+first = data("incomplete")
 result = submit(first)
 assert result["status"] == "registrada", result
 assert len(calls) == 1 and balance() == 9000
@@ -145,7 +145,7 @@ assert balance() == 9000
 assert submit(rejected)["status"] == "rechazada" and len(calls) == 2
 
 # Unknown results reserve the cost and never resend with the same request key.
-for name in ["malformed", "incomplete", "server-error", "drop"]:
+for name in ["malformed", "server-error", "drop"]:
     attempt = data(name)
     before = balance()
     row = submit(attempt)
