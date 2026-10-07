@@ -83,7 +83,7 @@ $requested = is_string($_GET['tramite'] ?? null) ? $_GET['tramite'] : '';
 <?php endif; endforeach; ?>
 <?php if (!$ready || $configurationError !== ''): ?><section><h2>Emisión en preparación</h2><p><?= escape($configurationError ?: 'El servicio de emisión se habilitará cuando termine su configuración.') ?></p></section>
 <?php else: ?><section><h2>Nueva solicitud · Persona natural</h2>
-<p>Completa los datos de tu cliente. ENEXT enviará al correo del titular las instrucciones de biometría; el certificado se emite después de completar las verificaciones del proveedor.</p>
+<p>La solicitud se envía automáticamente a ENEXT si tienes saldo suficiente, sin aprobación del administrador. Completa los datos de tu cliente. ENEXT enviará al correo del titular las instrucciones de biometría; el certificado se emite después de completar las verificaciones del proveedor.</p>
 <form method="post" id="emission-form">
 <input type="hidden" name="csrf" value="<?= escape(csrf_token()) ?>">
 <input type="hidden" name="request_key" value="<?= escape($key) ?>">

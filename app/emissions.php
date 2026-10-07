@@ -199,10 +199,10 @@ function dist_enext_result(int $http, string $body, bool $transportOk): string
         return 'revision';
     }
     if ($http >= 200 && $http < 300 && (int)$result['codigo'] === 1) {
-        // Registration is not final certificate issuance. ENEXT completes biometrics.
-        return is_string($result['token_biometria'] ?? null) && trim($result['token_biometria']) !== ''
-            && is_string($result['link_biometria'] ?? null) && trim($result['link_biometria']) !== ''
-            ? 'registrada' : 'revision';
+        // An explicit provider acceptance registers the request.
+        // Biometric links may be delivered directly by email; they are not needed by the portal.
+        // This does not claim that biometrics or final certificate issuance are complete.
+        return 'registrada';
     }
     if ((int)$result['codigo'] === 0 && (($http >= 200 && $http < 300)
         || in_array($http, [400,401,403,422], true))) {
@@ -235,9 +235,24 @@ function dist_send_enext(array $config, array $data, string $number): array
     ]);
     $ok = curl_exec($ch) !== false;
     $http = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $curlCode = curl_errno($ch);
     curl_close($ch);
     // Never persist raw responses, credential-bearing payloads, or biometric links.
-    return ['status' => dist_enext_result($http, $body, $ok), 'http' => $http];
+    $parsed = json_decode(trim($body), true);
+    if (!is_array($parsed) && ($start = strpos($body, '{')) !== false) {
+        $parsed = json_decode(substr($body, $start), true);
+    }
+    $code = is_array($parsed) ? ($parsed['codigo'] ?? null) : null;
+    $diagnostic = [
+        'http' => $http, 'curl_code' => $curlCode, 'transport_ok' => $ok,
+        'bytes' => strlen($body), 'json_object' => is_array($parsed),
+        'codigo' => in_array($code, [0,1,'0','1'], true) ? (int)$code : 'other_or_missing',
+        'token_present' => is_string($parsed['token_biometria'] ?? null) && trim($parsed['token_biometria']) !== '',
+        'link_present' => is_string($parsed['link_biometria'] ?? null) && trim($parsed['link_biometria']) !== '',
+    ];
+    error_log('ALIADOS ENEXT ' . $number . ' ' . json_encode($diagnostic));
+    return ['status' => dist_enext_result($http, $body, $ok), 'http' => $http,
+        'diagnostic' => json_encode($diagnostic, JSON_THROW_ON_ERROR)];
 }
 
 function dist_submit_emission(PDO $connection, int $userId, array $input): array
@@ -273,9 +288,10 @@ function dist_submit_emission(PDO $connection, int $userId, array $input): array
     try {
         $result = dist_send_enext($config, $data, $row['numero_tramite']);
     } catch (Throwable $error) {
-        $result = ['status' => 'revision', 'http' => 0];
+        error_log('ALIADOS ENEXT ' . $row['numero_tramite'] . ' internal_exception');
+        $result = ['status' => 'revision', 'http' => 0, 'diagnostic' => 'internal_exception'];
     }
-    dist_finish_emission($connection, $userId, (int)$row['id'], $result['status'], $result['http']);
+    dist_finish_emission($connection, $userId, (int)$row['id'], $result['status'], $result['http'], $result['diagnostic'] ?? '');
     $find->execute([$userId, $key]);
     return $find->fetch();
 }
@@ -283,5 +299,5 @@ function dist_submit_emission(PDO $connection, int $userId, array $input): array
 function dist_emission_status(string $status): string
 {
     return ['enviando' => 'En proceso · saldo reservado', 'registrada' => 'Registrada en ENEXT',
-        'rechazada' => 'Rechazada · saldo liberado', 'revision' => 'En revisión · saldo reservado'][$status] ?? 'En revisión';
+        'rechazada' => 'Rechazada · saldo liberado', 'revision' => 'Respuesta de ENEXT sin confirmar · saldo reservado'][$status] ?? 'En revisión';
 }
