@@ -50,7 +50,7 @@ if (!empty($_SESSION['login_error'])) {
     >
 
     <link
-        href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
         rel="stylesheet"
     >
 
@@ -80,7 +80,7 @@ if (!empty($_SESSION['login_error'])) {
     --border: #e2e8f0;
 
     --font:
-        'Manrope',
+        'Inter',
         -apple-system,
         BlinkMacSystemFont,
         'Segoe UI',
@@ -1444,6 +1444,12 @@ footer {
     }
 }
 
+
+/* Tipografía del Portal de Aliados */
+body{font-weight:600}
+h1,h2,h3{font-weight:800}
+.btn,label,nav a{font-weight:700}
+input,select,textarea{font-weight:600}
 </style>
 
 </head>
