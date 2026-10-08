@@ -63,7 +63,10 @@ class ENEXT(http.server.BaseHTTPRequestHandler):
         assert self.headers["Authorization"] == "Basic dGVzdC1iYXNpYzp0ZXN0LWJhc2ljLXBhc3N3b3Jk"
         assert payload["usuario"] == "test-socio" and payload["password"] == "test-socio-password"
         assert payload["tipo_envio"] == "EMAIL" and payload["tipo_clave"] == 1
-        assert payload["numero_tramite"].startswith("DIST-")
+        assert re.fullmatch(r"DIST-\d{14}-[A-F0-9]{8}", payload["numero_tramite"])
+        assert list(payload) == ["numero_tramite", "usuario", "password", "perfil_firma", "nombres",
+                                 "apellidos", "cedula", "codigo_dactilar", "correo", "provincia",
+                                 "ciudad", "parroquia", "direccion", "celular", "tipo_envio", "tipo_clave"]
         assert "quoted_cost" not in payload and "request_key" not in payload and "user" not in payload
         with calls_lock:
             calls.append(payload)
@@ -134,6 +137,26 @@ for message, expected in [
     assert diagnostic == expected
 assert json.loads(php("echo json_encode(dist_enext_error_diagnostic($input));",
                       {"mensaje": ["unexpected"]}).stdout) == {"error_category": "unspecified"}
+
+# The private error message explains the error but removes echoed credentials, PII and links.
+private_values = dict(nombres="Ana Maria", apellidos="Perez", direccion="Calle Prueba",
+                      correo="private@example.com", cedula="1701234567", celular="0991234567",
+                      codigo_dactilar="A1234B5678", perfil_firma="002")
+private_config = dict(ENEXT_BASIC_USER="test-basic", ENEXT_BASIC_PASSWORD="test-basic-password",
+                      ENEXT_SOCIO_USER="test-socio", ENEXT_SOCIO_PASSWORD="test-socio-password")
+error_response = dict(mensaje="Fallo: numero_tramite excede longitud. " +
+                      " ".join(private_values.values()) + " " + " ".join(private_config.values()) +
+                      " private-token https://example.com/biometria?token=private-token " +
+                      "other@example.com +593991234567",
+                      token_biometria="private-token")
+safe = php("echo dist_enext_safe_error_message($input['result'],$input['config'],$input['data']);",
+           dict(result=error_response, config=private_config, data=private_values)).stdout
+assert "numero_tramite excede longitud" in safe, safe
+for secret in list(private_config.values()) + [v for k,v in private_values.items() if k != "perfil_firma"]:
+    assert secret.lower() not in safe.lower(), safe
+assert "private-token" not in safe and "https://" not in safe and "@" not in safe
+assert "593991234567" not in safe
+assert php("echo dist_enext_safe_error_message($input,[],[]);", {"mensaje": ["bad"]}).stdout == "ENEXT no incluyó un mensaje de error."
 
 # Validation and readiness fail before provider calls or reservations.
 for override in [dict(quoted_cost="1"), dict(confirmed="0"), dict(cedula="123"),
