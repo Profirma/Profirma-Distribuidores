@@ -7,3 +7,55 @@
 
 /* Tipografía del Portal de Aliados */
 h1,h2,h3,.stat strong{font-weight:800}button,label,th,.links a{font-weight:700}.check{font-weight:600}
+
+/* Formulario de emisión de Aliados */
+.emission-page{background:#f3f6fb}
+.emission-page main{max-width:1240px;margin:36px auto 64px}
+.emission-heading{display:flex;align-items:center;justify-content:space-between;gap:24px;margin-bottom:30px}
+.emission-heading h1{font-size:clamp(28px,3.2vw,40px);letter-spacing:-1.2px;margin:7px 0 12px}
+.emission-page .eyebrow{font-size:11px;letter-spacing:2px;color:#52708e;margin:0}
+.heading-description{color:#5a6b80;font-size:14px;margin:0;max-width:600px}
+.balance-chip{background:#07396b;border-radius:18px;padding:18px 24px;color:white;min-width:205px;box-shadow:0 8px 24px #07396b16}
+.balance-chip span{display:block;font-size:12px;color:#d0e3f7}
+.balance-chip strong{font-size:30px;font-weight:800;letter-spacing:-.8px}
+.emission-layout{display:grid;grid-template-columns:minmax(0,1fr) 350px;gap:26px;align-items:start}
+.emission-fields{display:grid;gap:22px;min-width:0}
+.form-card{background:white;border:1px solid #dce5f0;border-radius:20px;padding:24px 26px 28px;min-width:0;margin:0;box-shadow:0 3px 12px #122f4b04}
+.form-card legend{float:left;width:100%;display:flex;align-items:center;gap:12px;font-size:18px;font-weight:800;color:#07396b;padding:0;margin-bottom:14px}
+.step-number{display:inline-grid;place-items:center;background:#eaf2fd;color:#0b4c8b;border-radius:10px;width:34px;height:34px;font-size:14px;flex-shrink:0}
+.form-description{clear:both;color:#65778b;font-size:12px;margin:0 0 20px}
+.field-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px 18px}
+.form-field{min-width:0}.field-full{grid-column:1/-1}
+.emission-page .form-field label{font-size:12px;margin:0 0 8px;color:#293e54}
+.emission-page input:not([type=checkbox]),.emission-page select{max-width:none;width:100%;background:#fbfcfe;border:1px solid #cfdbea;border-radius:10px;padding:13px 14px;font-size:14px;transition:border-color .15s,box-shadow .15s}
+.emission-page input::placeholder{color:#8291a3;font-weight:500}
+.emission-page input:focus-visible,.emission-page select:focus-visible{outline:2px solid #0d63bd;outline-offset:2px;border-color:#0d63bd}
+.emission-page small{font-size:11px;margin-top:7px;line-height:1.6}
+.emission-summary{position:sticky;top:24px;background:white;border:1px solid #dce5f0;border-radius:20px;padding:26px;box-shadow:0 10px 35px #1238540b}
+.summary-label{font-size:10px;letter-spacing:1.7px;color:#647991;font-weight:800}
+.emission-summary h2{font-size:23px;letter-spacing:-.6px;margin:8px 0 12px}
+.person-tag{display:inline-block;padding:5px 11px;border-radius:20px;background:#edf4fc;color:#24517d;font-size:11px}
+.emission-summary>label:not(.check){font-size:12px;margin:24px 0 8px}
+.cost-box{background:#eef5fd;border:1px solid #dceafa;border-radius:14px;padding:18px;margin:20px 0}
+.cost-box>span{display:block;font-size:12px;color:#456581}
+.cost-box>strong{font-size:36px;color:#07396b;letter-spacing:-1.2px;display:block;font-weight:800}
+.cost-box small{color:#57708a;margin:0}
+.summary-row{display:flex;justify-content:space-between;gap:12px;font-size:12px;padding:10px 0;color:#53677e}
+.summary-row strong{color:#173f66}
+.emission-summary .check{font-size:11px;line-height:1.7;margin:20px 0;color:#52657b}
+.emission-summary .check input{width:17px;height:17px;flex-shrink:0;accent-color:#07396b}
+.emission-summary button.primary{width:100%;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:15px;border-radius:11px;font-size:13px;margin-top:0;box-shadow:0 6px 14px #07396b1a}
+.emission-summary button:hover{background:#0d4d89}.emission-summary button:disabled{opacity:.7;cursor:wait}
+.summary-help{font-size:11px;color:#6b7c91;line-height:1.7;margin:14px 0}
+.payment-details{border-top:1px solid #e5ecf4;padding-top:14px;font-size:11px;color:#64778c}
+.payment-details summary{cursor:pointer;color:#335679;font-weight:700}
+.payment-details p{margin-bottom:0}
+.balance-warning{font-size:12px;color:#9a3d13;background:#fff4e9;border-radius:9px;padding:12px}
+.emission-history{margin-top:30px;border-color:#dce5f0;border-radius:20px}
+.emission-history h2{font-size:21px;letter-spacing:-.5px}
+.emission-history table{font-size:12px}.emission-history th{background:#f7f9fc;color:#526d87;font-size:11px}
+.status-badge{display:inline-block;padding:5px 9px;border-radius:8px;background:#eef3f8;color:#536a80;font-size:10px}
+.status-registrada{background:#e9f8f0;color:#1c7148}.status-rechazada{background:#fcecec;color:#ad3b3b}.status-revision,.status-enviando{background:#fff4df;color:#886119}
+@media(max-width:950px){.emission-layout{grid-template-columns:minmax(0,1fr) 310px;gap:18px}.form-card,.emission-summary{padding:20px}}
+@media(max-width:780px){.emission-layout{grid-template-columns:1fr}.emission-summary{position:static}.emission-heading{align-items:flex-start;flex-direction:column;gap:18px}.balance-chip{width:100%}.balance-chip strong{font-size:27px}}
+@media(max-width:480px){.field-grid{grid-template-columns:1fr;gap:16px}.form-card,.emission-summary{padding:18px}.form-card legend{font-size:16px}.emission-page main{padding:0 14px;margin-top:24px}}
