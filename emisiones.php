@@ -67,12 +67,17 @@ if (!isset($prices[$selected])) {
 }
 $labels = ['nombres'=>'Nombres del titular', 'apellidos'=>'Apellidos del titular',
     'cedula'=>'Cédula', 'codigo_dactilar'=>'Código dactilar', 'correo'=>'Correo del titular',
-    'celular'=>'Celular del titular', 'provincia'=>'Provincia', 'ciudad'=>'Ciudad',
-    'parroquia'=>'Parroquia', 'direccion'=>'Dirección'];
+    'celular'=>'Teléfono', 'provincia'=>'Provincia', 'ciudad'=>'Ciudad',
+    'parroquia'=>'Parroquia', 'direccion'=>'Dirección de residencia'];
+$provinces = ["Azuay","Bolívar","Cañar","Carchi","Chimborazo","Cotopaxi","El Oro","Esmeraldas","Galápagos","Guayas","Imbabura","Loja","Los Ríos","Manabí","Morona Santiago","Napo","Orellana","Pastaza","Pichincha","Santa Elena","Santo Domingo de los Tsáchilas","Sucumbíos","Tungurahua","Zamora Chinchipe"];
+$placeholders = ['nombres'=>'Ej. Carlos Alfredo', 'apellidos'=>'Ej. Mendoza Paredes',
+    'cedula'=>'1712345678', 'codigo_dactilar'=>'Ej. V123456789', 'celular'=>'0991234567',
+    'correo'=>'cliente@correo.com', 'direccion'=>'Av. principal y calle secundaria',
+    'ciudad'=>'Ej. Guayaquil', 'parroquia'=>'Ej. Tarqui'];
 $requested = is_string($_GET['tramite'] ?? null) ? $_GET['tramite'] : '';
 ?>
 <!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Emitir firma | PRO-FIRMA</title><link rel="stylesheet" href="assets/panel.css?v=20261008-form-v2"></head>
+<title>Emitir firma | PRO-FIRMA</title><link rel="stylesheet" href="assets/panel.css?v=20261008-form-admin"></head>
 <body class="emission-page"><header><a class="brand" href="dashboard.php"><img src="logo.jpeg" alt="PRO-FIRMA"> Portal de Aliados</a>
 <nav class="links"><a href="dashboard.php">Mi cuenta</a><a href="recargas.php">Recargas y saldo</a>
 <form method="post" action="logout.php"><input type="hidden" name="csrf" value="<?= escape(csrf_token()) ?>"><button>Cerrar sesión</button></form></nav></header>
@@ -93,19 +98,34 @@ $requested = is_string($_GET['tramite'] ?? null) ? $_GET['tramite'] : '';
 <div class="emission-fields">
 <?php $groups = [
     ['title'=>'Datos del titular', 'description'=>'Escribe los datos tal como aparecen en su documento.', 'fields'=>['nombres','apellidos','cedula','codigo_dactilar']],
-    ['title'=>'Información de contacto', 'description'=>'ENEXT enviará las instrucciones al correo del titular. Revisa que esté bien escrito.', 'fields'=>['correo','celular']],
-    ['title'=>'Dirección del titular', 'description'=>'Indica dónde reside la persona que solicita la firma.', 'fields'=>['provincia','ciudad','parroquia','direccion']],
+    ['title'=>'Información de contacto', 'description'=>'ENEXT enviará las instrucciones al correo del titular. Revisa que esté bien escrito.', 'fields'=>['celular','correo']],
+    ['title'=>'Dirección del titular', 'description'=>'Indica dónde reside la persona que solicita la firma.', 'fields'=>['direccion','provincia','ciudad','parroquia']],
 ]; foreach ($groups as $number => $group): ?>
 <fieldset class="form-card"><legend><span class="step-number"><?= $number + 1 ?></span><?= escape($group['title']) ?></legend>
-<p class="form-description"><?= escape($group['description']) ?></p><div class="field-grid">
+<p class="form-description"><?= escape($group['description']) ?></p><div class="field-grid <?= $number === 2 ? 'address-grid' : '' ?>">
 <?php foreach ($group['fields'] as $field): ?><div class="form-field <?= $field === 'direccion' ? 'field-full' : '' ?>">
-<label for="field-<?= escape($field) ?>"><?= escape($labels[$field]) ?></label>
+<label for="field-<?= escape($field) ?>"><?= escape($labels[$field]) ?> <span aria-hidden="true">*</span></label>
+<?php if ($field === 'provincia'): ?>
+<select id="field-provincia" name="provincia" required>
+<option value="">Selecciona</option>
+<?php if ($fields['provincia'] !== '' && !in_array($fields['provincia'], $provinces, true)): ?>
+<option value="<?= escape($fields['provincia']) ?>" selected><?= escape($fields['provincia']) ?></option>
+<?php endif; ?>
+<?php foreach ($provinces as $province): ?>
+<option value="<?= escape($province) ?>" <?= $fields['provincia'] === $province ? 'selected' : '' ?>><?= escape($province) ?></option>
+<?php endforeach; ?>
+</select>
+<?php else: ?>
 <input id="field-<?= escape($field) ?>" name="<?= escape($field) ?>"
 value="<?= escape($fields[$field]) ?>" maxlength="<?= $field === 'cedula' ? 10 : (in_array($field, ['nombres','apellidos'], true) ? 120 : 250) ?>"
-<?= $field === 'correo' ? 'type="email" placeholder="nombre@correo.com"' : ($field === 'celular' ? 'type="tel" placeholder="0991234567"' : 'type="text"') ?>
-<?= $field === 'cedula' ? 'inputmode="numeric" pattern="[0-9]{10}" placeholder="10 dígitos"' : '' ?>
+type="<?= $field === 'correo' ? 'email' : ($field === 'celular' ? 'tel' : 'text') ?>"
+placeholder="<?= escape($placeholders[$field] ?? '') ?>"
+<?= $field === 'cedula' ? 'inputmode="numeric" pattern="[0-9]{10}"' : '' ?>
+<?= $field === 'codigo_dactilar' ? 'autocapitalize="characters" spellcheck="false" aria-describedby="dactilar-help"' : '' ?>
 <?= $field === 'correo' ? 'aria-describedby="email-help"' : '' ?> required>
-<?php if ($field === 'correo'): ?><small id="email-help">El enlace llegará por correo; no se mostrará en este portal.</small><?php endif; ?>
+<?php endif; ?>
+<?php if ($field === 'codigo_dactilar'): ?><small id="dactilar-help">Copia el código de la cédula del titular. Revisa letras y números: I/1 y O/0. No uses el ejemplo como dato real.</small><?php endif; ?>
+<?php if ($field === 'correo'): ?><small id="email-help">ENEXT enviará el enlace a este correo cuando acepte la solicitud; no se mostrará en el portal.</small><?php endif; ?>
 </div><?php endforeach; ?></div></fieldset>
 <?php endforeach; ?>
 </div>
