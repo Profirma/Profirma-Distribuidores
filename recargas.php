@@ -61,23 +61,19 @@ if ($ready) {
 $instructions = trim((string)getenv('BANK_TRANSFER_INSTRUCTIONS'));
 ?>
 <!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Recargar saldo | PRO-FIRMA</title><link rel="stylesheet" href="assets/panel.css"></head>
-<body><header><a class="brand" href="dashboard.php"><img src="logo.jpeg" alt="PRO-FIRMA"> Portal de Aliados</a><nav class="links"><a href="dashboard.php">Mi cuenta</a><a href="emisiones.php">Emitir firma</a>
+<title>Recargar saldo | PRO-FIRMA</title><link rel="stylesheet" href="assets/panel.css?v=20261008-cuenta"></head>
+<body class="portal-page wallet-page"><header><a class="brand" href="dashboard.php"><img src="logo.jpeg" alt="PRO-FIRMA"> Portal de Aliados</a><nav class="links"><a href="dashboard.php">Mi cuenta</a><a href="emisiones.php">Emitir firma</a>
 <form method="post" action="logout.php"><input type="hidden" name="csrf" value="<?= escape(csrf_token()) ?>"><button>Cerrar sesión</button></form></nav></header>
-<main><h1>Recargar saldo</h1>
+<main><div class="portal-heading"><div><p class="portal-eyebrow">TU BILLETERA</p><h1>Recargas y saldo</h1><p>Recarga por transferencia y lleva el control de tus movimientos.</p></div><a class="portal-button" href="emisiones.php">Emitir firma →</a></div>
 <?php if ($error): ?><p class="notice error" role="alert"><?= escape($error) ?></p><?php endif; ?>
 <?php if ($notice): ?><p class="notice" role="status"><?= escape($notice) ?></p><?php endif; ?>
 <?php if (!$ready): ?><section><h2>Recargas en preparación</h2><p>El administrador todavía debe habilitar las recargas por transferencia.</p></section>
-<?php else: ?><div class="stat"><strong><?= escape(dist_money($balance)) ?></strong> saldo disponible</div>
-<section><h2>Enviar comprobante de transferencia</h2>
-<p class="bank-details"><strong>Banco de destino: Banco Pichincha</strong><br>Realiza la transferencia a la cuenta de PRO-FIRMA.</p>
-<?php if ($instructions): ?><p class="bank-details"><?= nl2br(escape($instructions)) ?></p>
-<?php else: ?><p>Solicita a PRO-FIRMA el número de cuenta y los datos del titular antes de transferir.</p><?php endif; ?>
-<p>El comprobante quedará pendiente de revisión. Enviarlo no acredita saldo automáticamente.</p>
+<?php else: ?><section class="portal-balance wallet-balance"><div><span>Saldo disponible</span><strong><?= escape(dist_money($balance)) ?></strong><p>Listo para solicitar firmas electrónicas.</p></div><div class="balance-note">Las recargas se acreditan cuando el administrador verifica tu transferencia.</div></section><div class="wallet-layout">
+<section class="portal-card wallet-form"><p class="portal-eyebrow">NUEVA RECARGA</p><h2>Enviar comprobante</h2><p class="wallet-intro">Completa los datos de tu transferencia para verificar tu pago.</p>
 <form method="post" enctype="multipart/form-data">
 <input type="hidden" name="csrf" value="<?= escape(csrf_token()) ?>"><input type="hidden" name="request_key" value="<?= bin2hex(random_bytes(32)) ?>">
 <input type="hidden" name="MAX_FILE_SIZE" value="5242880">
-<label>Monto transferido (USD)<input name="amount" inputmode="decimal" placeholder="100.00" maxlength="12" value="<?= escape($fields['amount']) ?>" required></label>
+<div class="wallet-fields"><label>Monto transferido (USD)<input name="amount" inputmode="decimal" placeholder="100.00" maxlength="12" value="<?= escape($fields['amount']) ?>" required></label>
 <label>Banco desde el que transferiste<select name="bank" id="bank" required>
 <option value="">Selecciona tu banco</option>
 <?php foreach ($banks as $bank): ?><option value="<?= escape($bank) ?>" <?= $fields['bank'] === $bank ? 'selected' : '' ?>><?= escape($bank) ?></option><?php endforeach; ?>
@@ -86,15 +82,19 @@ $instructions = trim((string)getenv('BANK_TRANSFER_INSTRUCTIONS'));
 <label id="bank-other-label">Si elegiste otro, indica el banco o cooperativa<input name="bank_other" id="bank-other" maxlength="100" value="<?= escape($fields['bank_other']) ?>"></label>
 <label>Número o referencia de transferencia<input name="reference" maxlength="80" value="<?= escape($fields['reference']) ?>" required></label>
 <label>Fecha de transferencia<input name="date" type="date" value="<?= escape($fields['date']) ?>" max="<?= (new DateTimeImmutable('now', new DateTimeZone('America/Guayaquil')))->format('Y-m-d') ?>" required></label>
-<label>Comprobante<input type="file" name="receipt" accept="image/jpeg,image/png,application/pdf" required></label><small>JPG, PNG o PDF · Hasta 5 MB. El administrador y tú podrán descargarlo de forma privada.</small>
-<button class="primary">Enviar recarga para revisión</button></form></section>
-<section><h2>Mis últimas 50 recargas</h2><?php if (!$history): ?><p>Todavía no has enviado recargas.</p><?php endif; ?>
+</div><label class="receipt-field">Comprobante de transferencia<input type="file" name="receipt" accept="image/jpeg,image/png,application/pdf" required></label><small>JPG, PNG o PDF · Hasta 5 MB. El administrador y tú podrán descargarlo de forma privada.</small>
+<button class="primary">Enviar recarga para revisión</button></form></section><aside class="portal-card wallet-instructions"><p class="portal-eyebrow">DATOS PARA TRANSFERIR</p><h2>Banco Pichincha</h2><p class="bank-details"><strong>Banco de destino: Banco Pichincha</strong><br>Realiza la transferencia a la cuenta de PRO-FIRMA.</p>
+<?php if ($instructions): ?><p class="bank-details"><?= nl2br(escape($instructions)) ?></p>
+<?php else: ?><p>Solicita a PRO-FIRMA el número de cuenta y los datos del titular antes de transferir.</p><?php endif; ?>
+<p>El comprobante quedará pendiente de revisión. Enviarlo no acredita saldo automáticamente.</p>
+<ol><li>Realiza la transferencia a PRO-FIRMA.</li><li>Completa el formulario y adjunta tu comprobante.</li><li>Consulta la revisión en tu historial.</li></ol></aside></div>
+<section class="portal-card wallet-history"><h2>Historial de recargas</h2><p class="wallet-intro">Tus últimas 50 recargas y su estado de revisión.</p><?php if (!$history): ?><p>Todavía no has enviado recargas.</p><?php endif; ?>
 <div class="table"><table><thead><tr><th>Recarga</th><th>Monto</th><th>Transferencia</th><th>Estado</th><th>Motivo</th><th>Comprobante</th></tr></thead><tbody>
-<?php foreach ($history as $item): ?><tr><td>#<?= (int)$item['id'] ?></td><td><?= escape(dist_money($item['amount_cents'])) ?></td><td><?= escape($item['bank']) ?><br><?= escape($item['transfer_reference']) ?><br><?= escape($item['transfer_date']) ?></td><td><?= escape($item['status']) ?></td><td><?= escape($item['rejection_reason'] ?? '') ?></td><td><a href="comprobante.php?id=<?= (int)$item['id'] ?>">Descargar</a></td></tr><?php endforeach; ?>
+<?php foreach ($history as $item): ?><tr><td>#<?= (int)$item['id'] ?></td><td><?= escape(dist_money($item['amount_cents'])) ?></td><td><?= escape($item['bank']) ?><br><?= escape($item['transfer_reference']) ?><br><?= escape($item['transfer_date']) ?></td><td><span class="wallet-status wallet-status-<?= escape($item['status']) ?>"><?= escape($item['status']) ?></span></td><td><?= escape($item['rejection_reason'] ?? '') ?></td><td><a href="comprobante.php?id=<?= (int)$item['id'] ?>">Descargar</a></td></tr><?php endforeach; ?>
 </tbody></table></div></section>
-<section><h2>Últimos 50 movimientos de saldo</h2><?php if (!$movements): ?><p>Todavía no tienes movimientos de saldo.</p><?php endif; ?>
+<section class="portal-card wallet-history"><h2>Movimientos de saldo</h2><p class="wallet-intro">Últimos 50 movimientos de tu cuenta.</p><?php if (!$movements): ?><p>Todavía no tienes movimientos de saldo.</p><?php endif; ?>
 <div class="table"><table><thead><tr><th>Fecha</th><th>Concepto</th><th>Movimiento</th></tr></thead><tbody>
-<?php foreach ($movements as $item): ?><tr><td><?= escape($item['created_at']) ?></td><td><?= escape($item['concept']) ?><br><?= escape($item['reference']) ?></td><td><?= (int)$item['amount_cents'] > 0 ? '+' : '' ?><?= escape(dist_money($item['amount_cents'])) ?></td></tr><?php endforeach; ?>
+<?php foreach ($movements as $item): ?><tr><td><?= escape($item['created_at']) ?></td><td><?= escape($item['concept']) ?><br><?= escape($item['reference']) ?></td><td class="wallet-amount <?= (int)$item['amount_cents'] > 0 ? 'credit' : 'debit' ?>"><?= (int)$item['amount_cents'] > 0 ? '+' : '' ?><?= escape(dist_money($item['amount_cents'])) ?></td></tr><?php endforeach; ?>
 </tbody></table></div></section><?php endif; ?></main><script>
 const bank = document.getElementById('bank');
 const other = document.getElementById('bank-other');
