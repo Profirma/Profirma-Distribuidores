@@ -59,3 +59,5 @@ h1,h2,h3,.stat strong{font-weight:800}button,label,th,.links a{font-weight:700}.
 @media(max-width:950px){.emission-layout{grid-template-columns:minmax(0,1fr) 310px;gap:18px}.form-card,.emission-summary{padding:20px}}
 @media(max-width:780px){.emission-layout{grid-template-columns:1fr}.emission-summary{position:static}.emission-heading{align-items:flex-start;flex-direction:column;gap:18px}.balance-chip{width:100%}.balance-chip strong{font-size:27px}}
 @media(max-width:480px){.field-grid{grid-template-columns:1fr;gap:16px}.form-card,.emission-summary{padding:18px}.form-card legend{font-size:16px}.emission-page main{padding:0 14px;margin-top:24px}}
+
+.emission-history table{min-width:820px}.emission-history th,.emission-history td:nth-child(3),.emission-history td:nth-child(4),.emission-history td:last-child{white-space:nowrap}.emission-history td:nth-child(2){min-width:180px}
