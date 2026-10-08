@@ -79,3 +79,10 @@ h1,h2,h3,.stat strong{font-weight:800}button,label,th,.links a{font-weight:700}.
 .wallet-history{margin-top:26px}.wallet-history table{font-size:12px;min-width:740px}.wallet-history th{background:#f7f9fc;color:#526d87;font-size:11px;white-space:nowrap}.wallet-history td:nth-child(2){white-space:nowrap}.wallet-history td:first-child{white-space:nowrap}.wallet-history a{color:#0b4c8b;font-weight:800}.wallet-history .wallet-amount{white-space:nowrap;font-weight:800}.wallet-amount.credit{color:#1c7148}.wallet-amount.debit{color:#07396b}.wallet-status{display:inline-block;padding:6px 10px;border-radius:8px;background:#eef3f8;color:#536a80;font-size:10px;white-space:nowrap}.wallet-status-pendiente{background:#fff4df;color:#886119}.wallet-status-aprobada{background:#e9f8f0;color:#1c7148}.wallet-status-rechazada{background:#fcecec;color:#ad3b3b}
 @media(max-width:850px){.wallet-layout{grid-template-columns:1fr}.wallet-instructions{position:static}.account-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:600px){.portal-page main{padding:0 14px;margin-top:24px}.portal-heading{align-items:flex-start;flex-direction:column;gap:16px}.account-grid,.account-actions,.wallet-fields{grid-template-columns:1fr}.portal-card,.portal-balance{padding:20px}.portal-balance strong{font-size:40px}.wallet-balance{align-items:flex-start;flex-direction:column;gap:20px}.balance-note{max-width:none;padding:16px 0 0;border-left:0;border-top:1px solid #ffffff38}.wallet-history table{min-width:680px}}
+
+/* Orden de dirección tomado del formulario administrativo. */
+.emission-page .address-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+.emission-page .form-field label{font-weight:800}
+.emission-page input[name=codigo_dactilar]{font-variant-ligatures:none;font-family:'Inter',system-ui,sans-serif}
+@media(max-width:950px){.emission-page .address-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:480px){.emission-page .address-grid{grid-template-columns:1fr}}
