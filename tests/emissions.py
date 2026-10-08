@@ -120,6 +120,21 @@ for _ in range(2):
     subprocess.run(["php", "scripts/install_emissions.php"], check=True)
 assert balance() == 10000
 
+# Error diagnostics retain only fixed categories and SQLSTATE, never provider messages.
+for message, expected in [
+    ("SQLSTATE[22001]: test-socio-password private-token test@example.com 0990000000",
+     {"error_category": "provider_database", "sqlstate": "22001"}),
+    ("SMTP error test@example.com", {"error_category": "provider_notifications"}),
+    ("Credenciales invalidas", {"error_category": "provider_authentication"}),
+    ("Perfil no habilitado", {"error_category": "provider_validation"}),
+    ("Error interno private-token", {"error_category": "unspecified"}),
+]:
+    diagnostic = json.loads(php("echo json_encode(dist_enext_error_diagnostic($input));",
+                               {"mensaje": message}).stdout)
+    assert diagnostic == expected
+assert json.loads(php("echo json_encode(dist_enext_error_diagnostic($input));",
+                      {"mensaje": ["unexpected"]}).stdout) == {"error_category": "unspecified"}
+
 # Validation and readiness fail before provider calls or reservations.
 for override in [dict(quoted_cost="1"), dict(confirmed="0"), dict(cedula="123"),
                  dict(correo="bad"), dict(perfil_firma="999"), dict(perfil_firma="005"),
