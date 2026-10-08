@@ -60,3 +60,13 @@ El comando solo acepta trámites en proceso o revisión. No envía nada a ENEXT.
 GitHub Actions levanta PostgreSQL y un servidor ENEXT simulado con HTTPS y certificado de prueba. Comprueba Basic Auth y payload, reservas, liberaciones, reintentos, concurrencia, saldo insuficiente, tarifas manipuladas, fallo de base de datos después de una aceptación, sesión/CSRF, separación de historial y preservación de abonos, usuarios y datos existentes. No usa credenciales reales ni solicita firmas reales.
 
 Antes de abrir el servicio a distribuidores, verificar con las credenciales del servicio su endpoint y tarifas finales y realizar una prueba controlada autorizada con ENEXT. La documentación de API disponible en el repositorio no incluye consulta final de certificado, cancelación ni condiciones adicionales de facturación del proveedor.
+
+## Contrato actualizado de ENEXT (documentación suministrada en octubre de 2026)
+
+Para persona natural, la documentación indica `ENEXT_API_URL=https://enext.online/factureroweb/apiFactu/PNB.php`.
+Se mantienen Basic Auth, las credenciales de socio, POST JSON, `tipo_envio=EMAIL` y `tipo_clave=1`.
+Según ENEXT, la notificación también se envía por WhatsApp cuando se proporciona celular. El portal no muestra el enlace.
+
+Un HTTP 500 es un error interno del proveedor, no una aceptación ni un rechazo definitivo. No libera automáticamente saldo ni reenvía la emisión. Para diagnosticarlo, el registro `ALIADOS ENEXT` conserva una categoría fija del error y, cuando existe, el código SQLSTATE. Nunca guarda el texto completo de `mensaje`, datos del titular, credenciales o enlaces. La categoría orienta la investigación; no demuestra la causa ni la entrega de una notificación.
+
+La API de consulta de biometría requiere el token devuelto por ENEXT. No permite verificar por número de trámite los registros inciertos que no devolvieron token. Estos deben confirmarse con el proveedor antes de resolverlos mediante el script existente.

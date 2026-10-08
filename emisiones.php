@@ -52,7 +52,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
 if ($ready) {
     try {
         $find = dist_db()->prepare('SELECT numero_tramite, titular, correo, perfil_firma, cost_cents, status,
-            created_at FROM pf_distribuidores.emissions WHERE user_id = ? ORDER BY id DESC LIMIT 50');
+            created_at, http_code FROM pf_distribuidores.emissions WHERE user_id = ? ORDER BY id DESC LIMIT 50');
         $find->execute([$user['id']]);
         $history = $find->fetchAll();
         $balance = dist_wallet_balance(dist_db(), (int)$user['id']);
@@ -79,7 +79,10 @@ $requested = is_string($_GET['tramite'] ?? null) ? $_GET['tramite'] : '';
 <main><div class="emission-heading"><div><p class="eyebrow">PORTAL DE ALIADOS</p><h1>Emite una nueva firma</h1><p class="heading-description">Completa los datos del titular y elige la vigencia de su firma electrónica.</p></div><div class="balance-chip"><span>Tu saldo disponible</span><strong><?= escape(dist_money($balance)) ?></strong></div></div>
 <?php if ($error): ?><p class="notice error" role="alert"><?= escape($error) ?></p><?php endif; ?>
 <?php foreach ($history as $item): if ($requested === $item['numero_tramite']): ?>
-<p class="notice" role="status">Trámite <?= escape($item['numero_tramite']) ?>: <?= escape(dist_emission_status($item['status'])) ?>.</p>
+<p class="notice <?= in_array($item['status'], ['revision', 'rechazada'], true) ? 'error' : '' ?>" role="status">Trámite <?= escape($item['numero_tramite']) ?>: <?= escape(dist_emission_status($item['status'])) ?>.</p>
+<?php if ($item['status'] === 'revision' && (int)$item['http_code'] >= 500): ?>
+<p class="notice error" role="alert">ENEXT respondió con un error interno (HTTP <?= (int)$item['http_code'] ?>). No confirmó el registro ni el envío del enlace. Conserva el número de trámite para verificarlo con ENEXT antes de volver a solicitarlo.</p>
+<?php endif; ?>
 <?php endif; endforeach; ?>
 <?php if (!$ready || $configurationError !== ''): ?><section><h2>Emisión en preparación</h2><p><?= escape($configurationError ?: 'El servicio de emisión se habilitará cuando termine su configuración.') ?></p></section>
 <?php else: ?>
