@@ -72,7 +72,7 @@ $labels = ['nombres'=>'Nombres del titular', 'apellidos'=>'Apellidos del titular
 $requested = is_string($_GET['tramite'] ?? null) ? $_GET['tramite'] : '';
 ?>
 <!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Emitir firma | PRO-FIRMA</title><link rel="stylesheet" href="assets/panel.css"></head>
+<title>Emitir firma | PRO-FIRMA</title><link rel="stylesheet" href="assets/panel.css?v=20261008-form-v2"></head>
 <body class="emission-page"><header><a class="brand" href="dashboard.php"><img src="logo.jpeg" alt="PRO-FIRMA"> Portal de Aliados</a>
 <nav class="links"><a href="dashboard.php">Mi cuenta</a><a href="recargas.php">Recargas y saldo</a>
 <form method="post" action="logout.php"><input type="hidden" name="csrf" value="<?= escape(csrf_token()) ?>"><button>Cerrar sesión</button></form></nav></header>
@@ -126,54 +126,21 @@ value="<?= escape($fields[$field]) ?>" maxlength="<?= $field === 'cedula' ? 10 :
 <div class="table"><table><thead><tr><th>Trámite</th><th>Titular</th><th>Vigencia</th><th>Costo</th><th>Estado</th><th>Fecha</th></tr></thead><tbody>
 <?php foreach ($history as $item): ?><tr><td><?= escape($item['numero_tramite']) ?></td><td><?= escape($item['titular']) ?><br><?= escape($item['correo']) ?></td>
 <td><?= escape($profiles[$item['perfil_firma']]) ?></td><td><?= escape(dist_money($item['cost_cents'])) ?></td>
-<td><span class="status-badge status-<?= escape($item['status']) ?>"><?= escape(dist_emission_status($item['status'])) ?></span></td><td><?= escape($item['created_at']) ?></td></tr><?php endforeach; ?>
+<td><span class="status-badge status-<?= escape($item['status']) ?>"><?= escape(dist_emission_status($item['status'])) ?></span></td><td><?= escape((new DateTimeImmutable($item['created_at']))->setTimezone(new DateTimeZone('America/Guayaquil'))->format('d/m/Y H:i')) ?></td></tr><?php endforeach; ?>
 </tbody></table></div></section></main>
 <script>
 const profile = document.getElementById('profile');
+function formatMoney(cents) {
+    return (cents < 0 ? '-$' : '$') + (Math.abs(cents) / 100).toFixed(2);
+}
 if (profile) {
     profile.addEventListener('change', () => {
         const cost = Number(profile.selectedOptions[0].dataset.cost);
         document.getElementById('quoted-cost').value = String(cost);
-        document.getElementById('price').textContent = '
-    });
-}
-const form = document.getElementById('emission-form');
-if (form) {
-    form.addEventListener('submit', () => {
-        const button = document.getElementById('submit-emission');
-        button.disabled = true;
-        button.textContent = 'Enviando solicitud…';
-    });
-}
-</script></body></html>
- + (cost / 100).toFixed(2);
+        document.getElementById('price').textContent = formatMoney(cost);
         const remaining = document.getElementById('remaining-balance');
         const difference = Number(remaining.dataset.balance) - cost;
-        remaining.textContent = (difference < 0 ? '-
-    });
-}
-const form = document.getElementById('emission-form');
-if (form) {
-    form.addEventListener('submit', () => {
-        const button = document.getElementById('submit-emission');
-        button.disabled = true;
-        button.textContent = 'Enviando solicitud…';
-    });
-}
-</script></body></html>
- : '
-    });
-}
-const form = document.getElementById('emission-form');
-if (form) {
-    form.addEventListener('submit', () => {
-        const button = document.getElementById('submit-emission');
-        button.disabled = true;
-        button.textContent = 'Enviando solicitud…';
-    });
-}
-</script></body></html>
-) + (Math.abs(difference) / 100).toFixed(2);
+        remaining.textContent = formatMoney(difference);
         document.getElementById('balance-warning').hidden = difference >= 0;
     });
 }

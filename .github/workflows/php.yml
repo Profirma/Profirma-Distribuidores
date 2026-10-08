@@ -10,6 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Comprobar JavaScript del formulario y resumen de saldo
+        run: node tests/form-script.mjs
       - name: Comprobar sintaxis PHP 8.4
         run: docker run --rm -v "$PWD:/app" -w /app php:8.4-cli sh -c 'find . -name "*.php" -type f > /tmp/files; while IFS= read -r file; do php -l "$file" || exit 1; done < /tmp/files'
   emissions:
