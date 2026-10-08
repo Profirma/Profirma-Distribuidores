@@ -98,6 +98,9 @@ function dist_emission_data(array $input): array
     if (!array_key_exists($data['perfil_firma'], dist_profiles())) {
         throw new InvalidArgumentException('Selecciona una vigencia habilitada.');
     }
+    // Same normalization as Profirma/Profirma/panel/procesar_emision.php.
+    $data['cedula'] = preg_replace('/\\D+/', '', $data['cedula']);
+    $data['celular'] = preg_replace('/[^0-9+]/', '', $data['celular']);
     if (!preg_match('/^[0-9]{10}$/D', $data['cedula'])) {
         throw new InvalidArgumentException('La cédula debe tener 10 dígitos.');
     }
