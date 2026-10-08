@@ -211,6 +211,28 @@ function dist_enext_result(int $http, string $body, bool $transportOk): string
     return 'revision';
 }
 
+function dist_enext_error_diagnostic(array $result): array
+{
+    // Classify errors without retaining provider messages, personal data or secrets.
+    $message = is_string($result['mensaje'] ?? null) ? substr($result['mensaje'], 0, 8192) : '';
+    $category = 'unspecified';
+    if (preg_match('/SQLSTATE\\[([A-Z0-9]{5})\\]/i', $message, $match)) {
+        return ['error_category' => 'provider_database', 'sqlstate' => strtoupper($match[1])];
+    }
+    foreach ([
+        'provider_database' => '/database|base de datos|sql|duplicate|duplicad|data too long/i',
+        'provider_notifications' => '/smtp|mailer|whatsapp|correo|email/i',
+        'provider_authentication' => '/credencial|password|contrase|autentic|bloquead/i',
+        'provider_validation' => '/campo|perfil|cedula|cédula|dactilar|inv[aá]lid/i',
+    ] as $name => $pattern) {
+        if (preg_match($pattern, $message)) {
+            $category = $name;
+            break;
+        }
+    }
+    return ['error_category' => $category];
+}
+
 function dist_send_enext(array $config, array $data, string $number): array
 {
     $payload = $data + ['numero_tramite' => $number, 'usuario' => $config['ENEXT_SOCIO_USER'],
@@ -250,6 +272,9 @@ function dist_send_enext(array $config, array $data, string $number): array
         'token_present' => is_string($parsed['token_biometria'] ?? null) && trim($parsed['token_biometria']) !== '',
         'link_present' => is_string($parsed['link_biometria'] ?? null) && trim($parsed['link_biometria']) !== '',
     ];
+    if ($http >= 400 || $code === 0 || $code === '0') {
+        $diagnostic += dist_enext_error_diagnostic(is_array($parsed) ? $parsed : []);
+    }
     error_log('ALIADOS ENEXT ' . $number . ' ' . json_encode($diagnostic));
     return ['status' => dist_enext_result($http, $body, $ok), 'http' => $http,
         'diagnostic' => json_encode($diagnostic, JSON_THROW_ON_ERROR)];
