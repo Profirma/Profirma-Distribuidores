@@ -29,6 +29,9 @@ function dist_enext_config(): array
             throw new RuntimeException('La emisión todavía no está configurada. Contacta con PRO-FIRMA.');
         }
     }
+    foreach (['ENEXT_API_URL', 'ENEXT_BASIC_USER', 'ENEXT_SOCIO_USER'] as $key) {
+        $config[$key] = trim($config[$key]);
+    }
     $url = parse_url($config['ENEXT_API_URL']);
     if (!$url || ($url['scheme'] ?? '') !== 'https' || empty($url['host'])
         || isset($url['user']) || isset($url['pass']) || isset($url['fragment'])
@@ -146,7 +149,7 @@ function dist_reserve_emission(PDO $connection, int $userId, string $key, array 
         if ((int)$limit->fetchColumn() >= 30) {
             throw new InvalidArgumentException('Alcanzaste el límite de solicitudes por hora. Inténtalo más tarde.');
         }
-        $number = 'DIST-' . gmdate('YmdHis') . '-' . strtoupper(bin2hex(random_bytes(8)));
+        $number = 'DIST-' . gmdate('YmdHis') . '-' . strtoupper(bin2hex(random_bytes(4)));
         $insert = $connection->prepare('INSERT INTO pf_distribuidores.emissions
             (user_id, request_key, numero_tramite, perfil_firma, cost_cents, cedula, titular, correo)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING *');
@@ -233,17 +236,81 @@ function dist_enext_error_diagnostic(array $result): array
     return ['error_category' => $category];
 }
 
+function dist_enext_safe_error_message(array $result, array $config, array $data): string
+{
+    $message = $result['mensaje'] ?? '';
+    if (!is_string($message) || trim($message) === '') {
+        return 'ENEXT no incluyó un mensaje de error.';
+    }
+    // This is a private log only. Never send it to the browser or store a raw response.
+    $message = html_entity_decode(strip_tags($message), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+    $sensitive = array_values($config);
+    foreach ($data as $field => $value) {
+        if ($field !== 'perfil_firma' && is_string($value)) {
+            $sensitive[] = $value;
+            // Also hide individual parts of names and addresses echoed by the provider.
+            if (in_array($field, ['nombres', 'apellidos', 'direccion'], true)) {
+                foreach (preg_split('/\\s+/u', $value) ?: [] as $part) {
+                    if (strlen($part) >= 3) {
+                        $sensitive[] = $part;
+                    }
+                }
+            }
+        }
+    }
+    foreach (['token_biometria', 'link_biometria'] as $field) {
+        if (is_string($result[$field] ?? null)) {
+            $sensitive[] = $result[$field];
+        }
+    }
+    $sensitive[] = base64_encode(($config['ENEXT_BASIC_USER'] ?? '') . ':' . ($config['ENEXT_BASIC_PASSWORD'] ?? ''));
+    usort($sensitive, static fn($a, $b) => strlen((string)$b) <=> strlen((string)$a));
+    foreach ($sensitive as $value) {
+        if (!is_string($value) || $value === '') {
+            continue;
+        }
+        foreach (array_unique([$value, rawurlencode($value)]) as $variant) {
+            $message = preg_replace('/' . preg_quote($variant, '/') . '/iu', '[oculto]', $message) ?? '';
+        }
+    }
+    $message = preg_replace([
+        '~https?://[^\\s<>"\\\']+~iu',
+        '/[A-Z0-9._%+\\-]+@[A-Z0-9.\\-]+\\.[A-Z]{2,}/iu',
+        '/\\+?\\d[\\d ()\\-]{5,}\\d/u',
+        '/[A-Za-z0-9_\\-]{32,}/u',
+        '/[\\x00-\\x1F\\x7F]/u',
+    ], ['[enlace oculto]', '[correo oculto]', '[número oculto]', '[token oculto]', ' '], $message) ?? '';
+    return substr(trim($message), 0, 600);
+}
+
 function dist_send_enext(array $config, array $data, string $number): array
 {
-    $payload = $data + ['numero_tramite' => $number, 'usuario' => $config['ENEXT_SOCIO_USER'],
-        'password' => $config['ENEXT_SOCIO_PASSWORD'], 'tipo_envio' => 'EMAIL', 'tipo_clave' => 1];
+    // Same explicit PN payload and field order as panel/procesar_emision.php.
+    $payload = [
+        'numero_tramite' => $number,
+        'usuario' => trim($config['ENEXT_SOCIO_USER']),
+        'password' => $config['ENEXT_SOCIO_PASSWORD'],
+        'perfil_firma' => $data['perfil_firma'],
+        'nombres' => $data['nombres'],
+        'apellidos' => $data['apellidos'],
+        'cedula' => $data['cedula'],
+        'codigo_dactilar' => $data['codigo_dactilar'],
+        'correo' => $data['correo'],
+        'provincia' => $data['provincia'],
+        'ciudad' => $data['ciudad'],
+        'parroquia' => $data['parroquia'],
+        'direccion' => $data['direccion'],
+        'celular' => $data['celular'],
+        'tipo_envio' => 'EMAIL',
+        'tipo_clave' => 1,
+    ];
     $body = '';
     $ch = curl_init(trim($config['ENEXT_API_URL']));
     curl_setopt_array($ch, [
         CURLOPT_POST => true, CURLOPT_HTTPAUTH => CURLAUTH_BASIC,
-        CURLOPT_USERPWD => $config['ENEXT_BASIC_USER'] . ':' . $config['ENEXT_BASIC_PASSWORD'],
+        CURLOPT_USERPWD => trim($config['ENEXT_BASIC_USER']) . ':' . $config['ENEXT_BASIC_PASSWORD'],
         CURLOPT_HTTPHEADER => ['Content-Type: application/json', 'Accept: application/json'],
-        CURLOPT_POSTFIELDS => json_encode($payload, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE),
+        CURLOPT_POSTFIELDS => json_encode($payload, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
         CURLOPT_CONNECTTIMEOUT => 15, CURLOPT_TIMEOUT => 60,
         CURLOPT_FOLLOWLOCATION => false, CURLOPT_PROTOCOLS_STR => 'HTTPS',
         CURLOPT_SSL_VERIFYPEER => true, CURLOPT_SSL_VERIFYHOST => 2,
@@ -274,6 +341,10 @@ function dist_send_enext(array $config, array $data, string $number): array
     ];
     if ($http >= 400 || $code === 0 || $code === '0') {
         $diagnostic += dist_enext_error_diagnostic(is_array($parsed) ? $parsed : []);
+        $safeMessage = dist_enext_safe_error_message(is_array($parsed) ? $parsed : [], $config, $data);
+        error_log('ALIADOS ENEXT ERROR ' . $number . ' ' . json_encode(['http' => $http, 'mensaje' => $safeMessage],
+            JSON_INVALID_UTF8_SUBSTITUTE | JSON_UNESCAPED_UNICODE));
+
     }
     error_log('ALIADOS ENEXT ' . $number . ' ' . json_encode($diagnostic));
     return ['status' => dist_enext_result($http, $body, $ok), 'http' => $http,
