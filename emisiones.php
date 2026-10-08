@@ -73,39 +73,60 @@ $requested = is_string($_GET['tramite'] ?? null) ? $_GET['tramite'] : '';
 ?>
 <!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Emitir firma | PRO-FIRMA</title><link rel="stylesheet" href="assets/panel.css"></head>
-<body><header><a class="brand" href="dashboard.php"><img src="logo.jpeg" alt="PRO-FIRMA"> Portal de Aliados</a>
+<body class="emission-page"><header><a class="brand" href="dashboard.php"><img src="logo.jpeg" alt="PRO-FIRMA"> Portal de Aliados</a>
 <nav class="links"><a href="dashboard.php">Mi cuenta</a><a href="recargas.php">Recargas y saldo</a>
 <form method="post" action="logout.php"><input type="hidden" name="csrf" value="<?= escape(csrf_token()) ?>"><button>Cerrar sesión</button></form></nav></header>
-<main><h1>Emitir firma electrónica</h1><div class="stat"><strong><?= escape(dist_money($balance)) ?></strong> saldo disponible</div>
+<main><div class="emission-heading"><div><p class="eyebrow">PORTAL DE ALIADOS</p><h1>Emite una nueva firma</h1><p class="heading-description">Completa los datos del titular y elige la vigencia de su firma electrónica.</p></div><div class="balance-chip"><span>Tu saldo disponible</span><strong><?= escape(dist_money($balance)) ?></strong></div></div>
 <?php if ($error): ?><p class="notice error" role="alert"><?= escape($error) ?></p><?php endif; ?>
 <?php foreach ($history as $item): if ($requested === $item['numero_tramite']): ?>
 <p class="notice" role="status">Trámite <?= escape($item['numero_tramite']) ?>: <?= escape(dist_emission_status($item['status'])) ?>.</p>
 <?php endif; endforeach; ?>
 <?php if (!$ready || $configurationError !== ''): ?><section><h2>Emisión en preparación</h2><p><?= escape($configurationError ?: 'El servicio de emisión se habilitará cuando termine su configuración.') ?></p></section>
-<?php else: ?><section><h2>Nueva solicitud · Persona natural</h2>
-<p>La solicitud se envía automáticamente a ENEXT si tienes saldo suficiente, sin aprobación del administrador. Completa los datos de tu cliente. ENEXT enviará al correo del titular las instrucciones de biometría; el certificado se emite después de completar las verificaciones del proveedor.</p>
-<form method="post" id="emission-form">
+<?php else: ?>
+<form method="post" id="emission-form" class="emission-layout" autocomplete="off">
 <input type="hidden" name="csrf" value="<?= escape(csrf_token()) ?>">
 <input type="hidden" name="request_key" value="<?= escape($key) ?>">
 <input type="hidden" name="quoted_cost" id="quoted-cost" value="<?= (int)($prices[$selected] ?? 0) ?>">
-<label>Vigencia<select name="perfil_firma" id="profile" required>
+<div class="emission-fields">
+<?php $groups = [
+    ['title'=>'Datos del titular', 'description'=>'Escribe los datos tal como aparecen en su documento.', 'fields'=>['nombres','apellidos','cedula','codigo_dactilar']],
+    ['title'=>'Información de contacto', 'description'=>'ENEXT enviará las instrucciones al correo del titular. Revisa que esté bien escrito.', 'fields'=>['correo','celular']],
+    ['title'=>'Dirección del titular', 'description'=>'Indica dónde reside la persona que solicita la firma.', 'fields'=>['provincia','ciudad','parroquia','direccion']],
+]; foreach ($groups as $number => $group): ?>
+<fieldset class="form-card"><legend><span class="step-number"><?= $number + 1 ?></span><?= escape($group['title']) ?></legend>
+<p class="form-description"><?= escape($group['description']) ?></p><div class="field-grid">
+<?php foreach ($group['fields'] as $field): ?><div class="form-field <?= $field === 'direccion' ? 'field-full' : '' ?>">
+<label for="field-<?= escape($field) ?>"><?= escape($labels[$field]) ?></label>
+<input id="field-<?= escape($field) ?>" name="<?= escape($field) ?>"
+value="<?= escape($fields[$field]) ?>" maxlength="<?= $field === 'cedula' ? 10 : (in_array($field, ['nombres','apellidos'], true) ? 120 : 250) ?>"
+<?= $field === 'correo' ? 'type="email" placeholder="nombre@correo.com"' : ($field === 'celular' ? 'type="tel" placeholder="0991234567"' : 'type="text"') ?>
+<?= $field === 'cedula' ? 'inputmode="numeric" pattern="[0-9]{10}" placeholder="10 dígitos"' : '' ?>
+<?= $field === 'correo' ? 'aria-describedby="email-help"' : '' ?> required>
+<?php if ($field === 'correo'): ?><small id="email-help">El enlace llegará por correo; no se mostrará en este portal.</small><?php endif; ?>
+</div><?php endforeach; ?></div></fieldset>
+<?php endforeach; ?>
+</div>
+<aside class="emission-summary">
+<div class="summary-label">TU SOLICITUD</div><h2>Configura tu firma</h2><span class="person-tag">Persona natural</span>
+<label for="profile">Vigencia de la firma</label><select name="perfil_firma" id="profile" required>
 <?php foreach ($prices as $profile => $price): ?><option value="<?= escape((string)$profile) ?>" data-cost="<?= (int)$price ?>" <?= (string)$profile === $selected ? 'selected' : '' ?>><?= escape($profiles[$profile]) ?> · <?= escape(dist_money($price)) ?></option><?php endforeach; ?>
-</select></label>
-<?php foreach ($labels as $field => $label): ?><label><?= escape($label) ?><input name="<?= escape($field) ?>"
-value="<?= escape($fields[$field]) ?>" maxlength="<?= in_array($field, ['nombres','apellidos'], true) ? 120 : 250 ?>"
-<?= $field === 'correo' ? 'type="email"' : ($field === 'celular' ? 'type="tel"' : 'type="text"') ?>
-<?= $field === 'cedula' ? 'inputmode="numeric" pattern="[0-9]{10}"' : '' ?> required></label><?php endforeach; ?>
-<p>Costo de esta solicitud: <strong id="price"><?= escape(dist_money($prices[$selected] ?? 0)) ?></strong>.</p>
-<p>El costo se reserva al enviar. Si ENEXT rechaza expresamente la solicitud, se libera el saldo. Si la respuesta queda en revisión, consulta con PRO-FIRMA antes de intentar otra vez.</p>
-<label class="check"><input type="checkbox" name="confirmed" value="1" required> Confirmo los datos del titular, su autorización para tramitar la firma y el descuento del costo indicado de mi saldo.</label>
-<button class="primary" id="submit-emission">Enviar solicitud a ENEXT</button>
+</select>
+<div class="cost-box"><span>Costo de la solicitud</span><strong id="price"><?= escape(dist_money($prices[$selected] ?? 0)) ?></strong><small>Se descontará de tu saldo disponible.</small></div>
+<div class="summary-row"><span>Saldo actual</span><strong><?= escape(dist_money($balance)) ?></strong></div>
+<div class="summary-row"><span>Saldo después del envío</span><strong id="remaining-balance" data-balance="<?= (int)$balance ?>"><?= escape(dist_money($balance - ($prices[$selected] ?? 0))) ?></strong></div>
+<p id="balance-warning" class="balance-warning" role="status" <?= $balance >= ($prices[$selected] ?? 0) ? 'hidden' : '' ?>>Tu saldo no alcanza para esta vigencia. <a href="recargas.php">Recarga tu cuenta</a>.</p>
+<label class="check"><input type="checkbox" name="confirmed" value="1" required><span>Confirmo los datos, la autorización del titular y el descuento del costo indicado.</span></label>
+<button class="primary" id="submit-emission">Solicitar firma electrónica <span aria-hidden="true">→</span></button>
+<p class="summary-help">Envío automático a ENEXT con saldo suficiente, sin aprobación del administrador.</p>
+<details class="payment-details"><summary>¿Cómo se maneja el saldo?</summary><p>El costo se reserva al enviar. Si ENEXT rechaza la solicitud, se libera. Si su respuesta queda sin confirmar, consulta con PRO-FIRMA antes de volver a enviarla.</p></details>
 <noscript><p>Activa JavaScript para actualizar el costo cuando cambies la vigencia.</p></noscript>
-</form></section><?php endif; ?>
-<section><h2>Mis últimos 50 trámites</h2><?php if (!$history): ?><p>Todavía no has enviado solicitudes de firma.</p><?php endif; ?>
+</aside>
+</form><?php endif; ?>
+<section class="emission-history"><h2>Mis últimos 50 trámites</h2><?php if (!$history): ?><p>Todavía no has enviado solicitudes de firma.</p><?php endif; ?>
 <div class="table"><table><thead><tr><th>Trámite</th><th>Titular</th><th>Vigencia</th><th>Costo</th><th>Estado</th><th>Fecha</th></tr></thead><tbody>
 <?php foreach ($history as $item): ?><tr><td><?= escape($item['numero_tramite']) ?></td><td><?= escape($item['titular']) ?><br><?= escape($item['correo']) ?></td>
 <td><?= escape($profiles[$item['perfil_firma']]) ?></td><td><?= escape(dist_money($item['cost_cents'])) ?></td>
-<td><?= escape(dist_emission_status($item['status'])) ?></td><td><?= escape($item['created_at']) ?></td></tr><?php endforeach; ?>
+<td><span class="status-badge status-<?= escape($item['status']) ?>"><?= escape(dist_emission_status($item['status'])) ?></span></td><td><?= escape($item['created_at']) ?></td></tr><?php endforeach; ?>
 </tbody></table></div></section></main>
 <script>
 const profile = document.getElementById('profile');
@@ -113,7 +134,47 @@ if (profile) {
     profile.addEventListener('change', () => {
         const cost = Number(profile.selectedOptions[0].dataset.cost);
         document.getElementById('quoted-cost').value = String(cost);
-        document.getElementById('price').textContent = '$' + (cost / 100).toFixed(2);
+        document.getElementById('price').textContent = '
+    });
+}
+const form = document.getElementById('emission-form');
+if (form) {
+    form.addEventListener('submit', () => {
+        const button = document.getElementById('submit-emission');
+        button.disabled = true;
+        button.textContent = 'Enviando solicitud…';
+    });
+}
+</script></body></html>
+ + (cost / 100).toFixed(2);
+        const remaining = document.getElementById('remaining-balance');
+        const difference = Number(remaining.dataset.balance) - cost;
+        remaining.textContent = (difference < 0 ? '-
+    });
+}
+const form = document.getElementById('emission-form');
+if (form) {
+    form.addEventListener('submit', () => {
+        const button = document.getElementById('submit-emission');
+        button.disabled = true;
+        button.textContent = 'Enviando solicitud…';
+    });
+}
+</script></body></html>
+ : '
+    });
+}
+const form = document.getElementById('emission-form');
+if (form) {
+    form.addEventListener('submit', () => {
+        const button = document.getElementById('submit-emission');
+        button.disabled = true;
+        button.textContent = 'Enviando solicitud…';
+    });
+}
+</script></body></html>
+) + (Math.abs(difference) / 100).toFixed(2);
+        document.getElementById('balance-warning').hidden = difference >= 0;
     });
 }
 const form = document.getElementById('emission-form');
